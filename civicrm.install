@@ -53,7 +53,7 @@ function civicrm_uninstall() {
 
 function civicrm_requirements($phase) {
   global $base_url;
-  $civicrm_path = drupal_get_path('module', 'civicrm');
+  $civicrm_path = backdrop_get_path('module', 'civicrm');
 
   //remove the last occurrence of 'drupal' from path
   $pos = strrpos($civicrm_path, 'drupal');

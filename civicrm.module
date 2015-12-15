@@ -121,7 +121,7 @@ function civicrm_menu() {
       'page callback' => 'system_admin_menu_block_page',
       'access arguments' => array('access administration pages'),
       'file' => 'system.admin.inc',
-      'file path' => drupal_get_path('module', 'system'),
+      'file path' => backdrop_get_path('module', 'system'),
     ),
   );
 }
@@ -190,7 +190,7 @@ function civicrm_initialize() {
 
     if ($error == FALSE) {
       $failure = TRUE;
-      drupal_set_message("<strong><p class='error'>" .
+      backdrop_set_message("<strong><p class='error'>" .
         t("Oops! - The CiviCRM settings file (civicrm.settings.php) was not found in the expected location ") .
         "(" . $settingsFile . "). </p><p class='error'>" .
         $errorMsgAdd . '</p></strong>'
@@ -202,7 +202,7 @@ function civicrm_initialize() {
     $error = include_once ('CRM/Core/Config.php');
     if ($error == FALSE) {
       $failure = TRUE;
-      drupal_set_message("<strong><p class='error'>" .
+      backdrop_set_message("<strong><p class='error'>" .
         t("Oops! - The path for including CiviCRM code files is not set properly. Most likely there is an error in the <em>civicrm_root</em> setting in your CiviCRM settings file (!1).",
           array('!1' => $settingsFile)
         ) .
@@ -222,7 +222,7 @@ function civicrm_initialize() {
     // Add module-specific header elements
     $header = civicrm_html_head();
     if (!empty($header)) {
-      drupal_add_html_head($header);
+      backdrop_add_html_head($header);
     }
 
     CRM_Core_Config::singleton()->userSystem->setMySQLTimeZone();
@@ -239,7 +239,7 @@ function civicrm_initialize() {
  */
 function _civicrm_get_url_parameters() {
   $excludes = array('q', 'IDS_request_uri', 'IDS_user_agent');
-  return drupal_get_query_parameters(NULL, $excludes);
+  return backdrop_get_query_parameters(NULL, $excludes);
 }
 
 /**
@@ -253,7 +253,7 @@ function _civicrm_get_url_parameters() {
  *   String of url parameters e.g '?reset=1&id=2'.
  */
 function _civicrm_get_url_parameters_as_url_string() {
-  $string = drupal_http_build_query(_civicrm_get_url_parameters());
+  $string = backdrop_http_build_query(_civicrm_get_url_parameters());
   if (!empty($string)) {
     $string = '?' . $string;
   }
@@ -276,8 +276,8 @@ function civicrm_metatag_metatags_view_alter(&$output, $instance) {
   }
   $linkUrls = array('og:url', 'canonical', 'shortlink');
   foreach ($linkUrls as $url) {
-    if (isset($output[$url]['#attached']['drupal_add_html_head'][0][0]['#value'])) {
-      $output[$url]['#attached']['drupal_add_html_head'][0][0]['#value'] .= _civicrm_get_url_parameters_as_url_string();
+    if (isset($output[$url]['#attached']['backdrop_add_html_head'][0][0]['#value'])) {
+      $output[$url]['#attached']['backdrop_add_html_head'][0][0]['#value'] .= _civicrm_get_url_parameters_as_url_string();
     }
   }
 }
@@ -376,12 +376,12 @@ function civicrm_invoke() {
     isset($_GET['destination'])
   ) {
     // process the user login form and let it do the redirect?
-    return drupal_get_form('user_login');
+    return backdrop_get_form('user_login');
   }
 
   // make sure the system is initialized
   if (!civicrm_initialize()) {
-    return drupal_not_found();
+    return backdrop_not_found();
   }
 
   civicrm_cache_disable();
@@ -724,9 +724,9 @@ function civicrm_user_form_validate($form, &$form_state) {
  * Disable the drupal cache for all civicrm pages which should not be cached.
  */
 function civicrm_cache_disable() {
-  if (function_exists('drupal_page_is_cacheable')) {
+  if (function_exists('backdrop_page_is_cacheable')) {
     // This is a Drupal 7 function only - using 'easy option' of checking function.
-    drupal_page_is_cacheable(FALSE);
+    backdrop_page_is_cacheable(FALSE);
   }
 }
 
@@ -818,7 +818,7 @@ function civicrm_admin_menu_output_alter(&$content) {
 function civicrm_views_api() {
   return array(
     'api' => 3,
-    'path' => drupal_get_path('module', 'civicrm') . '/modules/views',
+    'path' => backdrop_get_path('module', 'civicrm') . '/modules/views',
   );
 }
 
@@ -942,7 +942,7 @@ function civicrm_user_admin_permissions_submit($form, &$form_state) {
     }
   }
   if (!empty($warning_permission_names)) {
-    drupal_set_message(t('The %1 role was assigned one or more permissions that may prove dangerous for users of that role to have. Please reconsider assigning %2 to them.',
+    backdrop_set_message(t('The %1 role was assigned one or more permissions that may prove dangerous for users of that role to have. Please reconsider assigning %2 to them.',
       array(
         '%1' => $roles[$rid],
         '%2' => implode(', ', $warning_permission_names),
@@ -957,7 +957,7 @@ function civicrm_user_admin_permissions_submit($form, &$form_state) {
  * Based on the jquery_update module.
  *
  * Make sure this page preprocess function runs last
- * so that a theme can't call drupal_get_js().
+ * so that a theme can't call backdrop_get_js().
  *
  * Also, add civicrm parameters to links so they are not truncated by the
  * language switcher.
@@ -975,7 +975,7 @@ function civicrm_theme_registry_alter(&$theme_registry) {
     $theme_registry['page']['preprocess functions'][] = 'civicrm_preprocess_page';
   }
   // Rewrite the links in order to add back CiviCRM parameters for the language switcher.
-  $theme_registry['links__locale_block']['theme path'] = drupal_get_path('module', 'civicrm');
+  $theme_registry['links__locale_block']['theme path'] = backdrop_get_path('module', 'civicrm');
   $theme_registry['links__locale_block']['function'] = 'civicrm_links__locale_block';
 }
 
@@ -1000,18 +1000,18 @@ function civicrm_preprocess_page(&$variables) {
      *
      * // Only do this for pages that have JavaScript on them.
      *  if (!empty($variables['scripts'])) {
-     *    $path = drupal_get_path('module', 'date_popup');
+     *    $path = backdrop_get_path('module', 'date_popup');
      *    unset($scripts['module'][$path . '/lib/ui.datepicker.js']);
-     *    $variables['scripts'] = drupal_get_js('header', $scripts);
+     *    $variables['scripts'] = backdrop_get_js('header', $scripts);
      *  }
      */
 
     // Similar process for CSS but there are 2 CSS related variables.
     // $variables['css'] and $variables['styles'] are both used.
     if (!empty($variables['css'])) {
-      $path = drupal_get_path('module', 'date_popup');
+      $path = backdrop_get_path('module', 'date_popup');
       unset($variables['css']['all']['module'][$path . '/themes/datepicker.css']);
-      $variables['styles'] = drupal_get_css($variables['css']);
+      $variables['styles'] = backdrop_get_css($variables['css']);
     }
   }
 }
@@ -1218,7 +1218,7 @@ function civicrm_reviews() {
     array(
       '#type' => 'regex',
       '#value' => '[\s\(](strlen|strtolower|strtoupper|substr|ucfirst)\s*\(',
-      '#warning' => 'in most cases, replace the string function with the drupal_ equivalent string functions',
+      '#warning' => 'in most cases, replace the string function with the backdrop_ equivalent string functions',
       '#severity' => 'minor',
     ),
     array(
