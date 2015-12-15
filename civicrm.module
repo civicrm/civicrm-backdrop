@@ -50,7 +50,7 @@ function civicrm_html_head() {
 }
 
 /**
- * Implements hook_permissions().
+ * Implements hook_permission().
  */
 function civicrm_permission() {
   // make sure the system is initialized
@@ -809,6 +809,93 @@ function civicrm_admin_menu_output_alter(&$content) {
     ),
     // #weight controls the order of links in the resulting item list.
     '#weight' => $weight,
+  );
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function civicrm_autoload_info() {
+  return array(
+
+    // field handlers
+    'civicrm_handler_field' => 'modules/views/civicrm/civicrm_handler_field.inc',
+    'civicrm_handler_field_activity' => 'modules/views/civicrm/civicrm_handler_field_activity.inc',
+    'civicrm_handler_field_address' => 'modules/views/civicrm/civicrm_handler_field_address.inc',
+    'civicrm_handler_field_component' => 'modules/views/civicrm/civicrm_handler_field_component.inc',
+    'civicrm_handler_field_contact_image' => 'modules/views/civicrm/civicrm_handler_field_contact_image.inc',
+    'civicrm_handler_field_contact_link' => 'modules/views/civicrm/civicrm_handler_field_contact_link.inc',
+    'civicrm_handler_field_country' => 'modules/views/civicrm/civicrm_handler_field_country.inc',
+    'civicrm_handler_field_county' => 'modules/views/civicrm/civicrm_handler_field_county.inc',
+    'civicrm_handler_field_custom' => 'modules/views/civicrm/civicrm_handler_field_custom.inc',
+    'civicrm_handler_field_custom_file' => 'modules/views/civicrm/civicrm_handler_field_custom_file.inc',
+    'civicrm_handler_field_datetime' => 'modules/views/civicrm/civicrm_handler_field_datetime.inc',
+    'civicrm_handler_field_drupalid' => 'modules/views/civicrm/civicrm_handler_field_drupalid.inc',
+    'civicrm_handler_field_email' => 'modules/views/civicrm/civicrm_handler_field_email.inc',
+    'civicrm_handler_field_encounter_medium' => 'modules/views/civicrm/civicrm_handler_field_encounter_medium.inc',
+    'civicrm_handler_field_event' => 'modules/views/civicrm/civicrm_handler_field_event.inc',
+    'civicrm_handler_field_event_link' => 'modules/views/civicrm/civicrm_handler_field_event_link.inc',
+    'civicrm_handler_field_custom_file' => 'modules/views/civicrm/civicrm_handler_field_file.inc',
+    'civicrm_handler_field_link' => 'modules/views/civicrm/civicrm_handler_field_link.inc',
+    'civicrm_handler_field_link_activity' => 'modules/views/civicrm/civicrm_handler_field_link_activity.inc',
+    'civicrm_handler_field_link_contact' => 'modules/views/civicrm/civicrm_handler_field_link_contact.inc',
+    'civicrm_handler_field_link_contribution' => 'modules/views/civicrm/civicrm_handler_field_link_contribution.inc',
+    'civicrm_handler_field_link_delete' => 'modules/views/civicrm/civicrm_handler_field_link_delete.inc',
+    'civicrm_handler_field_link_edit' => 'modules/views/civicrm/civicrm_handler_field_link_edit.inc',
+    'civicrm_handler_field_link_event' => 'modules/views/civicrm/civicrm_handler_field_link_event.inc',
+    'civicrm_handler_field_link_participant' => 'modules/views/civicrm/civicrm_handler_field_link_participant.inc',
+    'civicrm_handler_field_link_pcp' => 'modules/views/civicrm/civicrm_handler_field_link_pcp.inc',
+    'civicrm_handler_field_link_relationship' => 'modules/views/civicrm/civicrm_handler_field_link_relationship.inc',
+    'civicrm_handler_field_location' => 'modules/views/civicrm/civicrm_handler_field_location.inc',
+    'civicrm_handler_field_mail' => 'modules/views/civicrm/civicrm_handler_field_mail.inc',
+    'civicrm_handler_field_markup' => 'modules/views/civicrm/civicrm_handler_field_markup.inc',
+    'civicrm_handler_field_money' => 'modules/views/civicrm/civicrm_handler_field_money.inc',
+    'civicrm_handler_field_option' => 'modules/views/civicrm/civicrm_handler_field_option.inc',
+    'civicrm_handler_field_pcp_raised_amount' => 'modules/views/civicrm/civicrm_handler_field_pcp_raised_amount.inc',
+    'civicrm_handler_field_phone' => 'modules/views/civicrm/civicrm_handler_field_phone.inc',
+    'civicrm_handler_field_pseudo_constant' => 'modules/views/civicrm/civicrm_handler_field_pseudo_constant.inc',
+    'civicrm_handler_field_relationship_type' => 'modules/views/civicrm/civicrm_handler_field_relationship_type.inc',
+    'civicrm_handler_field_state' => 'modules/views/civicrm/civicrm_handler_field_state.inc',
+
+    // filter handlers
+    'civicrm_handler_filter_country_multi' => 'modules/views/civicrm/civicrm_handler_filter_country_multi.inc',
+    'civicrm_handler_filter_custom_option' => 'modules/views/civicrm/civicrm_handler_filter_custom_option.inc',
+    'civicrm_handler_filter_custom_single_option' => 'modules/views/civicrm/civicrm_handler_filter_custom_single_option.inc',
+    'civicrm_handler_filter_datetime' => 'modules/views/civicrm/civicrm_handler_filter_datetime.inc',
+    'civicrm_handler_filter_domain' => 'modules/views/civicrm/civicrm_handler_filter_domain.inc',
+    'civicrm_handler_filter_encounter_medium' => 'modules/views/civicrm/civicrm_handler_filter_encounter_medium.inc',
+    'civicrm_handler_filter_group_status' => 'modules/views/civicrm/civicrm_handler_filter_group_status.inc',
+    'civicrm_handler_filter_pseudo_constant' => 'modules/views/civicrm/civicrm_handler_filter_pseudo_constant.inc',
+    'civicrm_handler_filter_relationship_type' => 'modules/views/civicrm/civicrm_handler_filter_relationship_type.inc',
+    'civicrm_handler_filter_state_multi' => 'modules/views/civicrm/civicrm_handler_filter_state_multi.inc',
+
+    // relationship handlers
+    'civicrm_handler_relationship' => 'modules/views/civicrm/civicrm_handler_relationship.inc',
+    'civicrm_handler_relationship_address' => 'modules/views/civicrm/civicrm_handler_relationship_address.inc',
+    'civicrm_handler_relationship_contact2users' => 'modules/views/civicrm/civicrm_handler_relationship_contact2users.inc',
+    'civicrm_handler_relationship_memberships_contributionscivicrm_handler_relationship_location' => 'modules/views/civicrm/civicrm_handler_relationship_location.inc',
+    'civicrm_handler_relationship_mail' => 'modules/views/civicrm/civicrm_handler_relationship_mail.inc',
+    'civicrm_handler_relationship_memberships_contributions' => 'modules/views/civicrm/civicrm_handler_relationship_memberships_contributions.inc',
+    'civicrm_handler_relationship_phone' => 'modules/views/civicrm/civicrm_handler_relationship_phone.inc',
+    'civicrm_handler_relationship_relationship' => 'modules/views/civicrm/civicrm_handler_relationship_relationship.inc',
+
+    // sort handlers
+    'civicrm_handler_sort_address_pseudoconstant' => 'modules/views/civicrm/civicrm_handler_sort_address_pseudoconstant.inc',
+    'civicrm_handler_sort_county' => 'modules/views/civicrm/civicrm_handler_sort_county.inc',
+    'civicrm_handler_sort_date' => 'modules/views/civicrm/civicrm_handler_sort_date.inc',
+    'civicrm_handler_sort_pcp_raised_amount' => 'modules/views/civicrm/civicrm_handler_sort_pcp_raised_amount.inc',
+    'civicrm_handler_sort_state' => 'modules/views/civicrm/civicrm_handler_sort_state.inc',
+
+    // argument handlers
+    'civicrm_plugin_argument_default' => 'modules/views/civicrm/civicrm_plugin_argument_default.inc',
+    'views_handler_argument_civicrm_day' => 'modules/views/civicrm/views_handler_argument_civicrm_day.inc',
+    'views_handler_argument_civicrm_fulldate' => 'modules/views/civicrm/views_handler_argument_civicrm_fulldate.inc',
+    'views_handler_argument_civicrm_month' => 'modules/views/civicrm/views_handler_argument_civicrm_month.inc',
+    'views_handler_argument_civicrm_week' => 'modules/views/civicrm/views_handler_argument_civicrm_week.inc',
+    'views_handler_argument_civicrm_year' => 'modules/views/civicrm/views_handler_argument_civicrm_year.inc',
+    'views_handler_argument_civicrm_year_month' => 'modules/views/civicrm/views_handler_argument_civicrm_year_month.inc',
+
+    // Views plugins are mapped in hook_views_plugins() in civicrm.views.inc.
   );
 }
 

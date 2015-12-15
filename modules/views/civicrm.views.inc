@@ -755,23 +755,24 @@ function civicrm_date_views_tables() {
  * Implements hook_views_plugins().
  */
 function civicrm_views_plugins() {
-  $data = array();
+  $plugins = array();
 
   // This just tells us that the themes are elsewhere
-  $data['module'] = 'civicrm';
+  $plugins['module'] = 'civicrm';
 
   // Default argument to pull CiviCRM IDs from the URL
-  $data['argument default']['civicrm_id'] = array(
+  $plugins['argument default']['civicrm_id'] = array(
     'title' => t('CiviCRM ID from URL'),
-    'handler' => 'civicrm_plugin_argument_default_civicrm_id'
+    'handler' => 'civicrm_plugin_argument_default_civicrm_id',
+    'path' => "$civicrm_module_path/modules/views/plugins",
   );
 
   // Calendar module integration
   if (module_exists('calendar')) {
-    $civicrm_module_path = drupal_get_path('module', 'civicrm');
-    $data['row'] = array(
+    $civicrm_module_path = backdrop_get_path('module', 'civicrm');
+    $plugins['row'] = array(
       'civicrm_event_calendar' => array(
-      	'title' => t('Calendar Items'),
+        'title' => t('Calendar Items'),
         'help' => t('Displays each selected event as a Calendar item.'),
         'handler' => 'calendar_plugin_row_civicrm',
         'path' => "$civicrm_module_path/modules/views/plugins",
@@ -794,7 +795,7 @@ function civicrm_views_plugins() {
         'dao class' => 'CRM_Activity_DAO_Activity',
         'title field' => 'subject',
       ),
-			'civicrm_case_calendar' => array(
+      'civicrm_case_calendar' => array(
         'title' => t('Case Items'),
         'help' => t('Displays each selected case as a Calendar item.'),
         'handler' => 'calendar_plugin_row_civicrm',
@@ -834,5 +835,5 @@ function civicrm_views_plugins() {
     );
   }
 
-  return $data;
+  return $plugins;
 }
