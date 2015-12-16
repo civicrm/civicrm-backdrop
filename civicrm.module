@@ -753,10 +753,11 @@ function civicrm_enable() {
   // also invoke civicrm menu rebuild
   CRM_Core_Menu::store();
 
+  // FIXME: This was a hack in D7. Don't know if it's even needed in Backdrop.
   // Update the 'blocks' DB table with the blocks.
-  if (module_exists('block')) {
-    _block_rehash();
-  }
+  //if (module_exists('block')) {
+  //  _block_rehash();
+  //}
 }
 
 /**
