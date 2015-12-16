@@ -127,22 +127,6 @@ function civicrm_menu() {
 }
 
 /**
- * Implements hook_page_build().
- *
- * CRM-11823 - If Civi bootstrapped, then merge its HTML header with the CMS's header.
- * This hook is intended for page modification, here we are using it to add a header.
- */
-function civicrm_page_build($page) {
-  global $civicrm_root;
-  if (empty($civicrm_root)) {
-    return;
-  }
-  if ($region = CRM_Core_Region::instance('html-header', FALSE)) {
-    CRM_Utils_System::addHTMLHead($region->render(''));
-  }
-}
-
-/**
  * Initialize CiviCRM.
  *
  * Call this function from other modules too if they use the CiviCRM API.
@@ -1053,53 +1037,24 @@ function civicrm_user_admin_permissions_submit($form, &$form_state) {
  *   Registry theme metadata.
  */
 function civicrm_theme_registry_alter(&$theme_registry) {
-  if (isset($theme_registry['page'])) {
-    // See if our preprocess function is loaded, if so remove it.
-    if ($key = array_search('civicrm_preprocess_page', $theme_registry['page']['preprocess functions'])) {
-      unset($theme_registry['page']['preprocess functions'][$key]);
-    }
-    // Now add it on at the end of the array so that it runs last.
-    $theme_registry['page']['preprocess functions'][] = 'civicrm_preprocess_page';
-  }
   // Rewrite the links in order to add back CiviCRM parameters for the language switcher.
   $theme_registry['links__locale_block']['theme path'] = backdrop_get_path('module', 'civicrm');
   $theme_registry['links__locale_block']['function'] = 'civicrm_links__locale_block';
 }
 
 /**
- * Implements moduleName_preprocess_hook().
+ * Implements hook_preprocess_page().
  *
- * Based on the jquery_update module functions.
- *
- * Strips out JS and CSS for a path.
- *
- * @param array $variables
+ * CRM-11823 - If Civi bootstrapped, then merge its HTML header with the CMS's header.
+ * This hook is intended for page modification, here we are using it to add a header.
  */
 function civicrm_preprocess_page(&$variables) {
-  // to increase it's flexibility.
-  if (module_exists('date_popup') && (in_array(arg(0), array(
-    'civicrm', 'user')))) {
-
-    /**
-     * Have hidden this function as it is not needed,
-     * but left as an example when we need to unset js
-     * in the future...
-     *
-     * // Only do this for pages that have JavaScript on them.
-     *  if (!empty($variables['scripts'])) {
-     *    $path = backdrop_get_path('module', 'date_popup');
-     *    unset($scripts['module'][$path . '/lib/ui.datepicker.js']);
-     *    $variables['scripts'] = backdrop_get_js('header', $scripts);
-     *  }
-     */
-
-    // Similar process for CSS but there are 2 CSS related variables.
-    // $variables['css'] and $variables['styles'] are both used.
-    if (!empty($variables['css'])) {
-      $path = backdrop_get_path('module', 'date_popup');
-      unset($variables['css']['all']['module'][$path . '/themes/datepicker.css']);
-      $variables['styles'] = backdrop_get_css($variables['css']);
-    }
+  global $civicrm_root;
+  if (empty($civicrm_root)) {
+    return;
+  }
+  if ($region = CRM_Core_Region::instance('html-header', FALSE)) {
+    CRM_Utils_System::addHTMLHead($region->render(''));
   }
 }
 
