@@ -760,6 +760,7 @@ function civicrm_views_plugins() {
   // This just tells us that the themes are elsewhere
   $plugins['module'] = 'civicrm';
 
+  $civicrm_module_path = backdrop_get_path('module', 'civicrm');
   // Default argument to pull CiviCRM IDs from the URL
   $plugins['argument default']['civicrm_id'] = array(
     'title' => t('CiviCRM ID from URL'),
@@ -769,7 +770,6 @@ function civicrm_views_plugins() {
 
   // Calendar module integration
   if (module_exists('calendar')) {
-    $civicrm_module_path = backdrop_get_path('module', 'civicrm');
     $plugins['row'] = array(
       'civicrm_event_calendar' => array(
         'title' => t('Calendar Items'),
