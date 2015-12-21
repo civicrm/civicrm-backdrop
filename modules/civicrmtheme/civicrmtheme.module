@@ -34,6 +34,17 @@
  */
 
 /**
+ * Implements hook_config_info()
+ */
+function civicrmtheme_config_info() {
+  $prefixes['civicrmtheme.settings'] = array(
+    'label' => t('CiviCRM Theme settings'),
+    'group' => t('CiviCRM'),
+  );
+  return $prefixes;
+}
+
+/**
  * Get all available themes.
  */
 function civicrmtheme_list_themes() {
