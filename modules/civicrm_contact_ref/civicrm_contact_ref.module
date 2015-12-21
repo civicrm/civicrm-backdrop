@@ -277,7 +277,7 @@ function civicrm_contact_ref_autocomplete_value($field_name, $string = '') {
     // Add a class wrapper for a few required CSS overrides.
     $matches["{$row['title']} [cid:{$id}]"] = '<div class="reference-autocomplete">' . $row['rendered'] . '</div>';
   }
-  drupal_json_output($matches);
+  backdrop_json_output($matches);
 }
 
 /**

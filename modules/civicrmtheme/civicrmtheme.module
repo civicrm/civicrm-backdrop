@@ -56,6 +56,7 @@ function civicrmtheme_list_themes() {
  * Implementation of hook_form_alter().
  */
 function civicrmtheme_form_system_themes_admin_form_alter(&$form, $form_state) {
+  $config = config('civicrmtheme.settings');
   // Define a fieldset for civicrm theme setting section
   $form['admin_theme']['civicrm'] = array(
     '#type' => 'fieldset',
@@ -72,7 +73,7 @@ function civicrmtheme_form_system_themes_admin_form_alter(&$form, $form_state) {
       0 => t('Default theme')) + $theme_list,
     '#title' => t('CiviCRM Administration theme'),
     '#description' => t('Choose theme for CiviCRM administration/backend pages.'),
-    '#default_value' => variable_get('civicrmtheme_theme_admin', 0),
+    '#default_value' => $config->get('theme_admin'),
   );
 
   $form['admin_theme']['civicrm']['civicrm_public'] = array(
@@ -81,7 +82,7 @@ function civicrmtheme_form_system_themes_admin_form_alter(&$form, $form_state) {
       0 => t('Default theme')) + $theme_list,
     '#title' => t('CiviCRM Public theme'),
     '#description' => t('Choose theme for CiviCRM frontend pages.'),
-    '#default_value' => variable_get('civicrmtheme_theme_public', 0),
+    '#default_value' => $config->get('theme_public'),
   );
 
   // Add extra submit
@@ -93,8 +94,10 @@ function civicrmtheme_form_system_themes_admin_form_alter(&$form, $form_state) {
  * Process system_themes_form extra submit.
  */
 function civicrmtheme_system_themes_admin_form_submit($form, &$form_state) {
-  variable_set('civicrmtheme_theme_admin', $form_state['values']['civicrm_admin']);
-  variable_set('civicrmtheme_theme_public', $form_state['values']['civicrm_public']);
+  $config = config('civicrmtheme.settings');
+  $config->set('theme_admin', $form_state['values']['civicrm_admin']);
+  $config->set('theme_public', $form_state['values']['civicrm_public']);
+  $config->save();
 }
 
 /**
@@ -107,9 +110,9 @@ function civicrmtheme_custom_theme() {
   if (arg(1) == 'upgrade') {
     return;
   }
-
-  $admin_theme = variable_get('civicrmtheme_theme_admin', 0);
-  $public_theme = variable_get('civicrmtheme_theme_public', 0);
+  $config = config('civicrmtheme.settings');
+  $admin_theme = $config->get('theme_admin');
+  $public_theme = $config->get('theme_public');
 
   if ((!$admin_theme && !$public_theme) || !civicrm_initialize()) {
     return;
