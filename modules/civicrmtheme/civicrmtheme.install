@@ -53,8 +53,33 @@ function civicrmtheme_install() {
  * Implementation of hook_uninstall().
  */
 function civicrmtheme_uninstall() {
-  // cleaning variables
-  variable_del('civicrmtheme_theme_admin');
-  variable_del('civicrmtheme_theme_public');
+
 }
 
+/**
+ * @defgroup updates-7.x-to-1.x Updates from 7.x to 1.x
+ * @{
+ * Update functions from Drupal 7.x to Backdrop CMS 1.x.
+ */
+
+/**
+ * Move civicrmtheme settings from variables to config.
+ */
+
+function civicrmtheme_update_1000() {
+  // Migrate variables to config.
+  $config = config('civicrmtheme.settings');
+  $config->set('theme_admin', update_variable_get('civicrmtheme_theme_admin', 0));
+  $config->set('theme_public', update_variable_get('civicrmtheme_theme_public', 0));
+  $config->save();
+
+  // Delete variables.
+  update_variable_del('theme_admin');
+  update_variable_del('theme_public');
+
+}
+
+/**
+ * @} End of "defgroup updates-7.x-to-1.x"
+ * The next series of updates should start at 2000.
+ */
