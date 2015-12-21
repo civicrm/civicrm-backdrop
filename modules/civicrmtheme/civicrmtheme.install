@@ -76,9 +76,8 @@ function civicrmtheme_update_last_removed() {
 function civicrmtheme_update_1000() {
   // Migrate variables to config.
   $config = config('civicrmtheme.settings');
-  $config->set('theme_admin', update_variable_get('civicrmtheme_theme_admin', ''));
-  $config->set('theme_public', update_variable_get('civicrmtheme_theme_public', ''));
-
+  $config->set('theme_admin', update_variable_get('civicrmtheme_theme_admin', 0));
+  $config->set('theme_public', update_variable_get('civicrmtheme_theme_public', 0));
   $config->save();
 
   // Delete variables.
