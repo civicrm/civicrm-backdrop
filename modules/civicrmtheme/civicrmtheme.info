@@ -1,11 +1,12 @@
 name = CiviCRM Theme
 description =  Define alternate themes for CiviCRM.
 version = 4.6
-core = 7.x
+backdrop = 1.x
 package = CiviCRM
 project = civicrm
 
 dependencies[] = civicrm
 
-files[] = civicrmtheme.module
-files[] = civicrmtheme.install
+; TODO: Convert these to hook_autoload_info() hooks.
+;files[] = civicrmtheme.module
+;files[] = civicrmtheme.install
