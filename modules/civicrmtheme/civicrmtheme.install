@@ -57,13 +57,6 @@ function civicrmtheme_uninstall() {
 }
 
 /**
- * Implements hook_update_last_removed().
- */
-function civicrmtheme_update_last_removed() {
-  return 7000;
-}
-
-/**
  * @defgroup updates-7.x-to-1.x Updates from 7.x to 1.x
  * @{
  * Update functions from Drupal 7.x to Backdrop CMS 1.x.
