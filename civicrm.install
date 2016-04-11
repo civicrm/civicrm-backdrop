@@ -32,7 +32,9 @@
  * $Id$
  *
  */
-function civicrm_install() {}
+function civicrm_install() {
+  db_query("UPDATE {system} SET weight = 100 WHERE name = 'civicrm'");
+}
 
 /**
  * Implementation of hook_uninstall( )
@@ -55,8 +57,8 @@ function civicrm_requirements($phase) {
   global $base_url;
   $civicrm_path = backdrop_get_path('module', 'civicrm');
 
-  //remove the last occurrence of 'drupal' from path
-  $pos = strrpos($civicrm_path, 'drupal');
+  //remove the last occurrence of 'backdrop' from path
+  $pos = strrpos($civicrm_path, 'backdrop');
 
   if ($pos !== false) {
     $civicrm_path = substr_replace($civicrm_path, '', $pos, strlen($civicrm_path));
@@ -64,7 +66,7 @@ function civicrm_requirements($phase) {
 
   $url = $base_url . '/' . $civicrm_path . 'install/index.php';
 
-  $settings = glob('sites/*/civicrm.settings.php');
+  $settings = glob('civicrm.settings.php');
   $problems = array();
   if (empty($settings) && $phase == 'install') {
     $problems[] = array(
@@ -80,18 +82,8 @@ function civicrm_requirements($phase) {
 }
 
 /**
- * Update CiviCRM module weight
+ * Implements hook_update_last_removed().
  */
-function civicrm_update_7400(&$sandbox) {
-  db_query("UPDATE {system} SET weight = 100 WHERE name = 'civicrm'");
+function civicrm_update_last_removed() {
+  return 7401;
 }
-
-/**
- * Trigger cache clear to pick up TZ handling change from CRM-6877.
- */
-function civicrm_update_7401($sandbox) {
-  // This is an empty hook_update_N() so that caches will be
-  // cleared when update_finished() is called.
-  return t('TZ changes in CiviCRM Views picked up.');
-}
-
