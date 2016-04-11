@@ -34,8 +34,8 @@
  *
  * @abstractparam array  $edit     The array of form values submitted by the user.
  *
- * @param object $user     The user object on which the operation is being performed.
- * @param object $category The active category of user information being edited.
+ * @param object $account     The user object on which the operation is being performed.
+ * @param object $profile The active profile of user information being edited.
  *
  * @return mixed           depends on the operation being performed
  */
@@ -44,13 +44,13 @@
  * Implements hook_user_login().
  *
  * @param $edit
- * @param $user
+ * @param $account
  */
-function civicrm_user_login(&$edit, $user) {
+function civicrm_user_login(&$edit, $account) {
   if (!civicrm_initialize()) {
     return;
   }
-  return CRM_Core_BAO_UFMatch::synchronize($user, FALSE, 'Drupal',
+  return CRM_Core_BAO_UFMatch::synchronize($account, FALSE, 'Drupal',
     civicrm_get_ctype('Individual')
   );
 }
@@ -58,11 +58,9 @@ function civicrm_user_login(&$edit, $user) {
 /**
  * Implements hook_user_insert().
  *
- * @param $edit
- * @param $user
- * @param null $category
+ * @param $account
  */
-function civicrm_user_insert(&$edit, &$user, $category = NULL) {
+function civicrm_user_insert($account) {
   if (!civicrm_initialize()) {
     return;
   }
@@ -74,10 +72,10 @@ function civicrm_user_insert(&$edit, &$user, $category = NULL) {
 
   // Did civicrm generate this page, or is it via a user hook?
   if (civicrm_on_user_page()) {
-    civicrm_register_data($edit, $user, $category, FALSE);
+    civicrm_register_data($account, FALSE);
   }
   else {
-    CRM_Core_BAO_UFMatch::synchronize($user, FALSE, 'Drupal',
+    CRM_Core_BAO_UFMatch::synchronize($account, FALSE, 'Drupal',
       civicrm_get_ctype('Individual')
     );
   }
@@ -85,31 +83,29 @@ function civicrm_user_insert(&$edit, &$user, $category = NULL) {
 
 /**
  * Implements hook_user_update().
- * @param $edit
- * @param $user
- * @param $category
+ * @param $account
  */
-function civicrm_user_update(&$edit, &$user, $category) {
+function civicrm_user_update($account) {
   if (!civicrm_initialize()) {
     return;
   }
   // This always comes in via user hook.
   // in D7 we don't know if the email has changed, so we go ahead and update
-  if (isset($edit['mail']) && !empty($edit['mail'])) {
-    $contactID = CRM_Core_BAO_UFMatch::getContactId($user->uid);
+  if (isset($account->mail) && !empty($account->mail)) {
+    $contactID = CRM_Core_BAO_UFMatch::getContactId($account->uid);
     // cant find the contactID, so lets skip
     if (!$contactID) {
       return;
     }
     $contactEmail = CRM_Contact_BAO_Contact::getPrimaryEmail($contactID);
-    $userEmail = trim($edit['mail']);
+    $userEmail = trim($account->mail);
     if ($contactEmail != $userEmail) {
       CRM_Core_BAO_UFMatch::updateContactEmail($contactID, $userEmail);
     }
 
     // reset navigation on user role change
-    $editRoles     = array_keys(CRM_Utils_Array::value('roles', $edit, array()));
-    $orginRoles    = array_keys($user->original->roles);
+    $editRoles     = array_keys(CRM_Utils_Array::value('roles', $account, array()));
+    $orginRoles    = array_keys($account->original->roles);
     $editRoleDiff  = array_diff($editRoles, $orginRoles);
     $orginRoleDiff = array_diff($orginRoles, $editRoles);
     if (!empty($editRoleDiff) || !empty($orginRoleDiff)) {
@@ -130,45 +126,25 @@ function civicrm_user_delete($account) {
 }
 
 /**
- * Implements hook_user_categories().
+ * Get Profiles for User Account
+ * @return array $ufGroups
  */
-function civicrm_user_categories() {
+function civicrm_user_profiles() {
   if (!civicrm_initialize()) {
     return;
   }
-  $urlParts = explode('/', CRM_Utils_Array::value('q', $_GET, array()));
 
-  $allUFGroups = CRM_Core_BAO_UFGroup::getModuleUFGroup('User Account', 0, TRUE, CRM_Core_Permission::VIEW, array(
-    'id',
-    'name',
-    'title',
-    'is_active',
-  ));
+  $allUFGroups = CRM_Core_BAO_UFGroup::getModuleUFGroup('User Account', 0, TRUE, CRM_Core_Permission::VIEW, array('id', 'name', 'title', 'is_active' ));
   $ufGroups = array();
 
-  $weight = 100;
   foreach ($allUFGroups as $key => $value) {
     if ($value['is_active']) {
       $name = $value['name'];
-      foreach (array_reverse($urlParts) as $urlPart) {
-        if($urlPart == $name) {
-          continue;
-        }
-        elseif ($urlPart == $value['title']) {
-          $name = $value['title'];
-          continue;
-        }
-      }
-
       $ufGroups[] = array(
         'id' => $key,
         'name' => $name,
         'title' => $value['title'],
-        'weight' => $weight,
-        'access callback' => '_civicrm_categories_access',
-        'access arguments' => array("$key"),
       );
-      $weight += 10;
     }
   }
 
@@ -180,14 +156,15 @@ function civicrm_user_categories() {
  *
  * @todo I suspect that some of the stuff done in the old form_alter handler
  *       should live here instead under D7
- * @param $user
+ * @param $account
  * @param $view_mode
+ * @param $langcode
  */
-function civicrm_user_view($user, $view_mode) {
+function civicrm_user_view($account, $view_mode, $langcode) {
   if (!civicrm_initialize()) {
     return;
   }
-  $userID = CRM_Core_BAO_UFMatch::getContactId($user->uid);
+  $userID = CRM_Core_BAO_UFMatch::getContactId($account->uid);
   if ($userID) {
     // Make sure user has permission to view the record.
     $contactURL = NULL;
@@ -195,35 +172,26 @@ function civicrm_user_view($user, $view_mode) {
 
     if (CRM_Core_Permission::check('access CiviCRM') && $civiPerm) {
       $contactURL
-        = '<span class="user-page-link" id="user-page-contact" ><span class="user-page-bullet">&raquo;</span> '
+        = '<div class="form-item form-type-item user-page-link" id="user-page-contact">'
         . l(ts("View contact record"),
         'civicrm/contact/view',
           array('query' => array('reset' => 1, 'cid' => $userID))
         ) .
-        '</span>';
+        '</div>';
     }
 
     if (CRM_Core_Permission::check('access Contact Dashboard')) {
-      if (!empty($contactURL)) {
-        $contactURL .= '<br/>';
-      }
       $contactURL .=
-        '<span class="user-page-link" id="user-page-dashboard" ><span class="user-page-bullet">&raquo;</span> '
+        '<div class="form-item form-type-item user-page-link" id="user-page-dashboard">'
         . l(ts("View Contact Dashboard"),
           'civicrm/user',
           array('query' => array('reset' => 1, 'id' => $userID))
         ) .
-        '</span>';
+        '</div>';
     }
 
     $ctype = CRM_Core_DAO::getFieldValue('CRM_Contact_DAO_Contact', $userID, 'contact_type');
-
-    $ufGroups = CRM_Core_BAO_UFGroup::getModuleUFGroup('User Account', 0, TRUE, CRM_Core_Permission::VIEW, array(
-      'id',
-      'name',
-      'title',
-      'is_active',
-    ));
+    $ufGroups = CRM_Core_BAO_UFGroup::getModuleUFGroup('User Account', 0, TRUE, CRM_Core_Permission::VIEW, array('id', 'name', 'title', 'is_active'));
     $weight = 100;
     foreach ($ufGroups as $id => $ufGroup) {
 
@@ -236,33 +204,29 @@ function civicrm_user_view($user, $view_mode) {
       }
       $page = new CRM_Profile_Page_Dynamic($userID, $id, NULL, TRUE);
       $pageContent = $page->run();
-
       // CRM-3537: profile edit link
       $editURL = '';
-      if (user_edit_access($user)) {
+      if (user_edit_access($account)) {
         $editURL = '<span class="user-page-link" id="user-page-profile-' . substr($ufGroup['title'], 0, 3) . '" ><span class="user-page-bullet">&raquo;</span> '
-          . l(ts("Edit %1", array(1 => $ufGroup['title'])), "user/{$user->uid}/edit/" . $ufGroup['name']) . '</span>';
+          . l(ts("Edit %1", array(1 => $ufGroup['title'])), "user/{$account->uid}/edit/" . $ufGroup['name']) . '</span>';
       }
 
       if ($pageContent) {
-        $user->content[$ufGroup['name']] = array(
+        $account->content[$ufGroup['name']] = array(
+          '#type' => 'item',
           '#title' => $ufGroup['title'],
-          '#type' => 'user_profile_category',
-          '#weight' => $weight,
-        );
-        $user->content[$ufGroup['name']][$ufGroup['name']] = array(
-          '#type' => 'user_profile_item',
-          '#title' => NULL,
           '#value' => $pageContent . $editURL,
           '#markup' => $pageContent . $editURL,
+          '#weight' => $weight,
         );
 
         $weight += 10;
       }
     }
-
     if ($contactURL) {
-      $user->content['urls'] = array(
+      $account->content['urls'] = array(
+        '#type' => 'item',
+        '#title' => t('CRM Contact'),
         '#markup' => $contactURL,
         '#weight' => $weight,
       );
@@ -280,21 +244,4 @@ function civicrm_user_logout($account) {
   }
   $session = CRM_Core_Session::singleton();
   $session->reset();
-}
-
-/**
- * Validation functions so CiviCRM can get at these items.
- * @param $form
- * @param $form_state
- */
-function civicrm_validate_user_forms($form, &$form_state) {
-  if (!civicrm_initialize()) {
-    return;
-  }
-  // we ignore this
-  $edit = array();
-  // this as well
-  $category = FALSE;
-  global $user;
-  civicrm_validate_data($edit, $user, $category);
 }

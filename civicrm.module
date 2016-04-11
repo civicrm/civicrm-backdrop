@@ -26,7 +26,7 @@
  * Drupal module file.
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2015
+ * @copyright CiviCRM LLC (c) 2004-2016
  */
 require_once 'civicrm_user.inc';
 
@@ -103,17 +103,15 @@ function civicrm_menu() {
   if (!civicrm_initialize()) {
     return;
   }
-
-  return array(
-    'civicrm' => array(
+  $items['civicrm'] = array(
       'title' => 'CiviCRM',
       'access callback' => TRUE,
       'page callback' => 'civicrm_invoke',
       'type' => 4,
       'weight' => 0,
-    ),
-    // administration section for civicrm integration modules.
-    'admin/config/civicrm' => array(
+  );
+  // administration section for civicrm integration modules.
+  $items['admin/config/civicrm'] = array(
       'title' => 'CiviCRM',
       'description' => 'Configure CiviCRM integration modules.',
       'position' => 'left',
@@ -122,8 +120,86 @@ function civicrm_menu() {
       'access arguments' => array('access administration pages'),
       'file' => 'system.admin.inc',
       'file path' => backdrop_get_path('module', 'system'),
-    ),
   );
+  $profiles = civicrm_user_profiles();
+  foreach ($profiles as $profile) {
+    $path = 'user/%user/edit/' . $profile['name'];
+    $items[$path] = array(
+      'page callback' => 'drupal_get_form',
+      'title callback' => 'civicrm_profile_title_callback',
+      'title arguments' => array((string) $profile['id'], $profile['title']),
+      'page arguments' => array('civicrm_profile_form', 1,3),
+      'access arguments' => TRUE,
+      'access callback' => '_civicrm_profiles_access',
+      'access arguments' => array($profile['id']),
+      'type' => MENU_LOCAL_TASK,
+      'weight' => 10,
+    );
+  }
+  return $items;
+}
+
+/**
+ * Display profile form in tabs on user account
+ */
+function civicrm_profile_form($form, &$form_state, $account, $profile_name) {
+  $output = civicrm_form_data($account, $profile_name, TRUE);
+  if (!empty($output)) {
+    $form['#attributes']['enctype'] = 'multipart/form-data';
+    $form = array_merge($form, $output);
+  }
+  $form_state['no_cache'] = TRUE;
+  $form['uid'] = array(
+    '#type' => 'hidden',
+    '#value' => $account->uid,
+  );
+  $form['profile_name'] = array(
+    '#type' => 'hidden',
+    '#value' => $profile_name,
+  );
+  $options['attributes']['class'][] = 'form-cancel';
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+  );
+  $form['actions']['cancel_form'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => 'user/' . $account->uid,
+    '#options' => $options,
+    '#weight' => 1,
+  );
+  return $form;
+}
+
+/**
+ * Validate civicrm_profile_form
+ */
+function civicrm_profile_form_validate($form, &$form_state) {
+  // lets suppress key generation for all validation also
+  civicrm_key_disable();
+
+  static $validated = FALSE;
+
+  if ($validated) {
+    return;
+  }
+
+  $validated = TRUE;
+
+  $userID = NULL;
+  if (!empty($form['uid'])) {
+    $userID = CRM_Core_BAO_UFMatch::getContactId($form['uid']['#value']);
+  }
+  $errors = CRM_Core_BAO_UFGroup::isValid($userID, $form['profile_name']['#value'], FALSE);
+  if ($errors && is_array($errors)) {
+    foreach ($errors as $name => $error) {
+      form_set_error($name, $error);
+    }
+    return FALSE;
+  }
+  return TRUE;
 }
 
 /**
@@ -455,7 +531,7 @@ function civicrm_on_user_page() {
   return isset($_POST['_qf_default']);
 }
 
-function _civicrm_categories_access($profile_id) {
+function _civicrm_profiles_access($profile_id) {
   if (!civicrm_initialize()) {
     return FALSE;
   }
@@ -464,18 +540,6 @@ function _civicrm_categories_access($profile_id) {
 
   if (is_array(CRM_Utils_Array::value($profile_id, $allUFGroups))) {
     return TRUE;
-  }
-}
-
-/*
- * Translating profile menu title dynamicaly to overide caching
- */
-function civicrm_menu_alter(&$items) {
-  $categories = civicrm_user_categories();
-  foreach ($categories as $cat) {
-    $path = 'user/%user_category/edit/' . $cat['name'];
-    $items[$path]['title callback'] = 'civicrm_profile_title_callback';
-    $items[$path]['title arguments'] = array((string) $cat['id'], $cat['title']);
   }
 }
 
@@ -490,75 +554,80 @@ function civicrm_profile_title_callback($profile_id, $fallback) {
 /**
  * Function needing explanation.
  *
- * @param $edit
- * @param $user
- * @param $category
+ * @param $account
  * @param $reset
  * @param bool $doNotProcess
  *
  * @return array
  */
-function civicrm_register_data($edit, &$user, $category, $reset, $doNotProcess = FALSE) {
+function civicrm_register_data($account, $reset, $doNotProcess = FALSE) {
   // lets suppress key generation for all registration forms
   civicrm_key_disable();
 
   $ctype = civicrm_get_ctype('Individual');
-  if ($user->uid) {
+  if ($account->uid) {
     // Happens on $type == 'insert'
     // $reset == false always
     // $doNotProcess == false always
-    CRM_Core_BAO_UFMatch::synchronize($user, TRUE, 'Drupal', $ctype);
-    $userID = CRM_Core_BAO_UFMatch::getContactId($user->uid);
+    CRM_Core_BAO_UFMatch::synchronize($account, TRUE, 'Drupal', $ctype);
+    $userID = CRM_Core_BAO_UFMatch::getContactId($account->uid);
 
     // CRM-7858
-    if (isset($edit['mail'])) {
+    if (isset($account->mail)) {
       CRM_Core_BAO_UFMatch::updateContactEmail($userID,
-        trim($edit['mail'])
+        trim($account->mail)
       );
     }
 
-    $html = CRM_Core_BAO_UFGroup::getEditHTML($userID, '',
-      2,
-      TRUE,
-      $reset, NULL,
-      $doNotProcess, $ctype
-    );
+    $html = CRM_Core_BAO_UFGroup::getEditHTML($userID, NULL, 2, TRUE, $reset,NULL, $doNotProcess, $ctype);
   }
   else {
     // Happens on $type == 'register'
-    $html = CRM_Core_BAO_UFGroup::getEditHTML(NULL, '',
-      1,
-      TRUE,
-      $reset, NULL,
-      $doNotProcess, $ctype
-    );
+    $html = CRM_Core_BAO_UFGroup::getEditHTML(NULL, NULL, 1, TRUE, $reset, NULL, $doNotProcess, $ctype);
   }
 
   $output = array();
+
   if ($html) {
     $html           = civicrm_add_jquery($html);
-    $index          = empty($category) ? 'civicrm-profile-register' : $category;
-    $output[$index] = array(
-      '#title' => $category,
+    $output['crm_profiles'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('CRM profiles'),
+        '#weight' => 100,
+        '#collapsible' => FALSE,
+        '#collapsed' => FALSE,
+      );
+    $output['crm_profiles']['civicrm-profile-register'] = array(
       '#type' => 'item',
       '#markup' => $html,
+      '#value' => $html,
       '#weight' => 1,
     );
   }
   return $output;
 }
 
-function civicrm_form_data($edit, &$user, $category, $reset, $doNotProcess = FALSE) {
+/**
+ * Retrieve the CiviCRM profile forms
+ *
+ * @param $account
+ * @param $profile
+ * @param $reset
+ * @param $doNotProcess
+ *
+ * @return array $output
+ */
+function civicrm_form_data($account, $profile, $reset, $doNotProcess = FALSE) {
   // lets suppress key generation for all CMS forms
   civicrm_key_disable();
 
   $output = array();
 
-  $userID = CRM_Core_BAO_UFMatch::getContactId($user->uid);
+  $userID = CRM_Core_BAO_UFMatch::getContactId($account->uid);
   if (!$userID) {
     $ctype = civicrm_get_ctype('Individual');
-    CRM_Core_BAO_UFMatch::synchronize($user, FALSE, 'Drupal', $ctype);
-    $userID = CRM_Core_BAO_UFMatch::getContactId($user->uid);
+    CRM_Core_BAO_UFMatch::synchronize($account, FALSE, 'Drupal', $ctype);
+    $userID = CRM_Core_BAO_UFMatch::getContactId($account->uid);
   }
 
   // at this point we better have a valid userID
@@ -585,28 +654,23 @@ function civicrm_form_data($edit, &$user, $category, $reset, $doNotProcess = FAL
   }
   $ctype = CRM_Core_DAO::getFieldValue('CRM_Contact_DAO_Contact', $userID, 'contact_type');
   try {
-    $profileID = _civicrm_get_user_profile_id($category, $userID, $ctype);
+    $profileID = _civicrm_get_user_profile_id($profile, $userID, $ctype);
   }
   catch (Exception $e) {
     CRM_Core_Error::fatal($e->getMessage());
   }
 
-  $html = CRM_Core_BAO_UFGroup::getEditHTML($userID, $category, NULL, FALSE, $reset, $profileID, $doNotProcess, $ctype);
-
+  $html = CRM_Core_BAO_UFGroup::getEditHTML($userID, $profile, NULL, FALSE, $reset, $profileID, $doNotProcess, $ctype);
 
   if ($html) {
     $title = CRM_Core_DAO::getFieldValue("CRM_Core_DAO_UFGroup", $profileID, 'title', 'id');
     $html = civicrm_add_jquery($html);
-    $index = empty($category) ? 'civicrm-profile-my-account' : $category;
-    $output[$index][] = array(
-      '#title' => $title,
-      '#value' => $html,
-      '#weight' => 1,
-    );
-    $output[$index][] = array(
-      '#title' => $title,
+    $index = empty($profile) ? 'civicrm-profile-my-account' : $profile;
+    $output[$index][$profile][$profile] = array(
       '#type' => 'item',
+      '#title' => $title,
       '#markup' => $html,
+      '#value' => $html,
       '#weight' => 1,
     );
   }
@@ -673,6 +737,9 @@ function _civicrm_get_user_profile_id($name) {
   return $profileID;
 }
 
+/**
+ * User Form Validate
+ */
 function civicrm_user_form_validate($form, &$form_state) {
   // lets suppress key generation for all validation also
   civicrm_key_disable();
@@ -694,7 +761,7 @@ function civicrm_user_form_validate($form, &$form_state) {
   if (!empty($form['#user'])) {
     $userID = CRM_Core_BAO_UFMatch::getContactId($form['#user']->uid);
   }
-  $errors = CRM_Core_BAO_UFGroup::isValid($userID, $form['#user_category'], $register);
+  $errors = CRM_Core_BAO_UFGroup::isValid($userID, 'civicrm-profile-register', $register);
   if ($errors && is_array($errors)) {
     foreach ($errors as $name => $error) {
       form_set_error($name, $error);
@@ -928,12 +995,12 @@ function civicrm_add_jquery(&$html) {
   return $html;
 }
 
-function civicrm_form_alter(&$form, &$formValues, $formID) {
+function civicrm_form_alter(&$form, &$form_state, $formID) {
   switch ($formID) {
     case 'user_admin_permissions':
       $form['#submit'][] = 'civicrm_user_admin_permissions_submit';
     case 'system_clean_url_settings':
-      if (!empty($formValues['input'])) {
+      if (!empty($form_state['input'])) {
         // reset navigation for permissions changed and clean url
         if (!civicrm_initialize()) {
           return;
@@ -945,42 +1012,9 @@ function civicrm_form_alter(&$form, &$formValues, $formID) {
     case 'user_register_form':
       $form['#attributes']['enctype'] = 'multipart/form-data';
       $form['#validate'][] = 'civicrm_user_form_validate';
-      $output = civicrm_register_data($form,
-        $form['#user'],
-        NULL, TRUE, FALSE
-      );
+      $output = civicrm_register_data($form['#user'], FALSE);
       $form = array_merge($form, $output);
-      $formValues['no_cache'] = TRUE;
-      break;
-
-    case 'user_profile_form':
-      $inCategory = TRUE;
-      if ($form['#user_category']) {
-        $inCategory = FALSE;
-        $categories = civicrm_user_categories();
-        foreach ($categories as $cat) {
-          if ($form['#user_category'] == $cat['name']) {
-            $inCategory = TRUE;
-            break;
-          }
-        }
-      }
-
-      // only return a form to drupal my account page
-      $output = array();
-      if ($inCategory &&
-        arg(0) == 'user' &&
-        arg(2) == 'edit' &&
-        arg(3)
-      ) {
-        $form['#validate'][] = 'civicrm_user_form_validate';
-        $output = civicrm_form_data($form, $form['#user'], $form['#user_category'], TRUE);
-        if (!empty($output)) {
-          $form['#attributes']['enctype'] = 'multipart/form-data';
-          $form = array_merge($form, $output);
-        }
-      }
-      $formValues['no_cache'] = TRUE;
+      $form_state['no_cache'] = TRUE;
       break;
 
     default:
