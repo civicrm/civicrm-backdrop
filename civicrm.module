@@ -777,7 +777,7 @@ function civicrm_translated_menu_link_alter(&$item) {
 }
 
 /**
- * Implements hook_admin_menu_output_alter().
+ * Implements hook_admin_bar_output_alter().
  */
 function civicrm_admin_bar_output_alter(&$content) {
   if (!civicrm_initialize()) {
