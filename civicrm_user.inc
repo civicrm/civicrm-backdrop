@@ -21,13 +21,13 @@
  */
 
 /**
- * Drupal module include file.
+ * Backdrop module include file.
  */
 
 /**
  * User hooks for civicrm module
  *
- * Note that we ignore the edit field and do not follow the drupal protocol
+ * Note that we ignore the edit field and do not follow the backdrop protocol
  * of extracting values from the edit field. We extract the fields directly
  * from $_POST. This is because the underlying form package that we use
  * (HTML_QuickForm) does the form value extraction and validation.
@@ -50,7 +50,7 @@ function civicrm_user_login(&$edit, $account) {
   if (!civicrm_initialize()) {
     return;
   }
-  return CRM_Core_BAO_UFMatch::synchronize($account, FALSE, 'Drupal',
+  return CRM_Core_BAO_UFMatch::synchronize($account, FALSE, 'Backdrop',
     civicrm_get_ctype('Individual')
   );
 }
@@ -75,7 +75,7 @@ function civicrm_user_insert($account) {
     civicrm_register_data($account, FALSE);
   }
   else {
-    CRM_Core_BAO_UFMatch::synchronize($account, FALSE, 'Drupal',
+    CRM_Core_BAO_UFMatch::synchronize($account, FALSE, 'Backdrop',
       civicrm_get_ctype('Individual')
     );
   }

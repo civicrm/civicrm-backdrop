@@ -2,7 +2,7 @@
 
 /**
  * @file
- * CiviCRM file for integrating with Drupal.
+ * CiviCRM file for integrating with Backdrop.
  *
  * Project:     CiviCRM: Constituent Relationship Management for NP's
  * File:        civicrm.module
@@ -23,7 +23,7 @@
  */
 
 /**
- * Drupal module file.
+ * Backdrop module file.
  *
  * @package CRM
  * @copyright CiviCRM LLC (c) 2004-2016
@@ -125,7 +125,7 @@ function civicrm_menu() {
   foreach ($profiles as $profile) {
     $path = 'user/%user/edit/' . $profile['name'];
     $items[$path] = array(
-      'page callback' => 'drupal_get_form',
+      'page callback' => 'backdrop_get_form',
       'title callback' => 'civicrm_profile_title_callback',
       'title arguments' => array((string) $profile['id'], $profile['title']),
       'page arguments' => array('civicrm_profile_form', 1,3),
@@ -236,11 +236,11 @@ function civicrm_initialize() {
     $error = include_once ($settingsFile);
 
     // get ready for problems
-    $docLinkInstall = "http://wiki.civicrm.org/confluence/display/CRMDOC/Drupal+Installation+Guide";
+    $docLinkInstall = "https://wiki.civicrm.org/confluence/display/CRMDOC/Installing+CiviCRM+for+Backdrop+CMS";
     $docLinkTrouble = "http://wiki.civicrm.org/confluence/display/CRMDOC/Installation+and+Configuration+Trouble-shooting";
     $forumLink      = "http://forum.civicrm.org/index.php/board,6.0.html";
 
-    $errorMsgAdd = t("Please review the <a href='!1'>Drupal Installation Guide</a> and the <a href='!2'>Trouble-shooting page</a> for assistance. If you still need help installing, you can often find solutions to your issue by searching for the error message in the <a href='!3'>installation support section of the community forum</a>.</strong></p>",
+    $errorMsgAdd = t("Please review the <a href='!1'>Backdrop Installation Guide</a> and the <a href='!2'>Trouble-shooting page</a> for assistance. If you still need help installing, you can often find solutions to your issue by searching for the error message in the <a href='!3'>installation support section of the community forum</a>.</strong></p>",
       array(
         '!1' => $docLinkInstall,
         '!2' => $docLinkTrouble,
@@ -294,7 +294,7 @@ function civicrm_initialize() {
 /**
  * Get CiviCRM query parameters from the url.
  *
- * This is useful for re-adding them to generated urls as drupal tends to drop
+ * This is useful for re-adding them to generated urls as backdrop tends to drop
  * them and we need them for language switching and generating urls for metadata.
  */
 function _civicrm_get_url_parameters() {
@@ -305,8 +305,8 @@ function _civicrm_get_url_parameters() {
 /**
  * Get CiviCRM query parameters from the url as a string for url output.
  *
- * Drupal tends to strip CiviCRM parameters from urls and we sometimes want to put them back.
- * For example drupal will output civicrm/contribution/transact as the metadata url whereas
+ * Backdrop tends to strip CiviCRM parameters from urls and we sometimes want to put them back.
+ * For example backdrop will output civicrm/contribution/transact as the metadata url whereas
  * we want civicrm/contribution/transact?reset=1&id=2
  *
  * @return string
@@ -362,15 +362,15 @@ function civicrm_links__locale_block($variables) {
 }
 
 /**
- * Find & register class loader and store location in Drupal variable.
+ * Find & register class loader and store location in Backdrop variable.
  *
- * Per CRM-13737 this allows for drupal code to be outside the core directory
+ * Per CRM-13737 this allows for backdrop code to be outside the core directory
  * which makes it easier for sites managing their own installation methods that
- * may need to cover different drupal versions
+ * may need to cover different backdrop versions
  */
 function _civicrm_registerClassLoader() {
   $home = dirname(__FILE__);
-  $path = variable_get('civicrm_class_loader', NULL);
+  $path = state_get('civicrm_class_loader', NULL);
   if (empty($path) || !file_exists($home . $path)) {
     $candidates = array(
       '/../CRM/Core/ClassLoader.php',
@@ -380,7 +380,7 @@ function _civicrm_registerClassLoader() {
     foreach ($candidates as $candidate) {
       if (file_exists($home . $candidate)) {
         $path = $candidate;
-        variable_set('civicrm_class_loader', $candidate);
+        state_set('civicrm_class_loader', $candidate);
         break;
       }
     }
@@ -448,7 +448,7 @@ function civicrm_invoke() {
 
   $args = explode('/', $_GET['q']);
 
-  // synchronize the drupal uid with the contacts db
+  // synchronize the backdrop uid with the contacts db
   global $user;
 
   /*
@@ -461,7 +461,7 @@ function civicrm_invoke() {
     $args[1] != 'upgrade'
   ) {
 
-    CRM_Core_BAO_UFMatch::synchronize($user, FALSE, 'Drupal',
+    CRM_Core_BAO_UFMatch::synchronize($user, FALSE, 'Backdrop',
       civicrm_get_ctype('Individual')
     );
   }
@@ -569,7 +569,7 @@ function civicrm_register_data($account, $reset, $doNotProcess = FALSE) {
     // Happens on $type == 'insert'
     // $reset == false always
     // $doNotProcess == false always
-    CRM_Core_BAO_UFMatch::synchronize($account, TRUE, 'Drupal', $ctype);
+    CRM_Core_BAO_UFMatch::synchronize($account, TRUE, 'Backdrop', $ctype);
     $userID = CRM_Core_BAO_UFMatch::getContactId($account->uid);
 
     // CRM-7858
@@ -626,7 +626,7 @@ function civicrm_form_data($account, $profile, $reset, $doNotProcess = FALSE) {
   $userID = CRM_Core_BAO_UFMatch::getContactId($account->uid);
   if (!$userID) {
     $ctype = civicrm_get_ctype('Individual');
-    CRM_Core_BAO_UFMatch::synchronize($account, FALSE, 'Drupal', $ctype);
+    CRM_Core_BAO_UFMatch::synchronize($account, FALSE, 'Backdrop', $ctype);
     $userID = CRM_Core_BAO_UFMatch::getContactId($account->uid);
   }
 
@@ -772,11 +772,11 @@ function civicrm_user_form_validate($form, &$form_state) {
 }
 
 /**
- * Disable the drupal cache for all civicrm pages which should not be cached.
+ * Disable the backdrop cache for all civicrm pages which should not be cached.
  */
 function civicrm_cache_disable() {
   if (function_exists('backdrop_page_is_cacheable')) {
-    // This is a Drupal 7 function only - using 'easy option' of checking function.
+    // This is a Backdrop 7 function only - using 'easy option' of checking function.
     backdrop_page_is_cacheable(FALSE);
   }
 }
@@ -831,7 +831,7 @@ function civicrm_enable() {
  * Implements hook_translated_menu_item_alter().
  *
  * This is a hack
- * to hide the CiviCRM menu from the drupal navigation block for folks
+ * to hide the CiviCRM menu from the backdrop navigation block for folks
  * who don't have access CiviCRM permissions
  */
 function civicrm_translated_menu_link_alter(&$item) {
@@ -882,7 +882,7 @@ function civicrm_autoload_info() {
     'civicrm_handler_field_custom' => 'modules/views/civicrm/civicrm_handler_field_custom.inc',
     'civicrm_handler_field_custom_file' => 'modules/views/civicrm/civicrm_handler_field_custom_file.inc',
     'civicrm_handler_field_datetime' => 'modules/views/civicrm/civicrm_handler_field_datetime.inc',
-    'civicrm_handler_field_drupalid' => 'modules/views/civicrm/civicrm_handler_field_drupalid.inc',
+    'civicrm_handler_field_backdropid' => 'modules/views/civicrm/civicrm_handler_field_backdropid.inc',
     'civicrm_handler_field_email' => 'modules/views/civicrm/civicrm_handler_field_email.inc',
     'civicrm_handler_field_encounter_medium' => 'modules/views/civicrm/civicrm_handler_field_encounter_medium.inc',
     'civicrm_handler_field_event' => 'modules/views/civicrm/civicrm_handler_field_event.inc',
@@ -1156,7 +1156,7 @@ function _civicrm_filter_process($text, $filter, $format, $langcode, $cache, $ca
   $text             = $smarty->fetch("string:${text}");
   $smarty->security = $was_secure;
 
-  // In the use-case of embedding Smarty codes inside a Drupal page, one is likely
+  // In the use-case of embedding Smarty codes inside a Backdrop page, one is likely
   // to load data using 'pull MVC' instead of 'push MVC', so the interesting
   // data isn't loaded until after processing the main content. Therefore, we
   // evaluate debug codes after the main content.
@@ -1378,7 +1378,7 @@ function civicrm_modules_uninstalled($modules) {
  * @param array $cid_parts
  */
 function civicrm_metatag_page_cache_cid_parts_alter(&$cid_parts) {
-  // Avoid substr() because it will not work with Drupal language prefixes.
+  // Avoid substr() because it will not work with Backdrop language prefixes.
   if (!empty($cid_parts['path']) && strpos($cid_parts['path'], 'civicrm') !== FALSE) {
     $get = $_GET;
     ksort($get);
