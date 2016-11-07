@@ -1,5 +1,5 @@
 name = CiviCRM Theme
-description =  Define alternate themes for CiviCRM.
+description =  Define alternative themes and layouts for CiviCRM.
 version = 4.7
 backdrop = 1.x
 type = module
@@ -7,6 +7,3 @@ package = CiviCRM
 project = civicrm
 
 dependencies[] = civicrm
-
-files[] = civicrmtheme.module
-files[] = civicrmtheme.install

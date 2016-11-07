@@ -39,9 +39,31 @@
 function civicrmtheme_config_info() {
   $prefixes['civicrmtheme.settings'] = array(
     'label' => t('CiviCRM Theme settings'),
-    'group' => t('CiviCRM'),
+    'group' => t('Configuration'),
+  );
+  $prefixes['layout.layout.civicrm_admin_default'] = array(
+    'label' => t('CiviCRM Default Layout'),
+    'group' => t('Layouts'),
   );
   return $prefixes;
+}
+
+/**
+ * Implements hook_layout_api().
+ */
+function civicrmtheme_layout_api() {
+  return array(
+    'file' => 'includes/civicrmtheme.layout.inc',
+  );
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function civicrmtheme_autoload_info() {
+  return array(
+    'CivicrmLayoutAccess' => 'plugins/access/civicrmtheme_layout_access.inc',
+  );
 }
 
 /**
@@ -148,4 +170,3 @@ function civicrmtheme_custom_theme() {
     return $admin_theme;
   }
 }
-
