@@ -24,11 +24,11 @@
 */
 
 /**
- * Field handler to provide relationship to Drupal User ID
+ * Field handler to provide relationship to Backdrop User ID
  *
  * @ingroup civicrm_field_handlers
  */
-class civicrm_handler_field_drupalid extends views_handler_field {
+class civicrm_handler_field_backdropid extends views_handler_field {
   function construct() {
     parent::construct();
     if (!civicrm_initialize()) {
