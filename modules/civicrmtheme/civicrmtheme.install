@@ -53,7 +53,8 @@ function civicrmtheme_install() {
  * Implementation of hook_uninstall().
  */
 function civicrmtheme_uninstall() {
-
+  $config = config('layout.layout.civicrm_admin_default');
+  $config->delete();
 }
 
 /**
