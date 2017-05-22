@@ -1,6 +1,4 @@
 <?php
-// $Id: civicrm_member_roles.install,v 1.2.4.2 2008/08/17 21:44:19 posco Exp $
-
 
 /**
  * Copyright (C) 2010 Neil Goodman
@@ -9,11 +7,6 @@
  * @file
  * Install CiviMember Role Sync database table and provide hook_uninstall.
  */
-
-/**
- * Implementation of hook_install().
- */
-function civicrm_member_roles_install() {}
 
 /*
  * Implemenation of hook_enable()
@@ -32,10 +25,11 @@ function civicrm_member_roles_schema() {
         'type' => 'serial',
         'not null' => TRUE,
       ),
-      'rid' => array(
-        'type' => 'int',
-        'unsigned' => TRUE,
+      'role_name' => array(
+        'type' => 'varchar',
+        'length' => 64,
         'not null' => TRUE,
+        'default' => '',
       ),
       'type_id' => array(
         'type' => 'int',
@@ -54,9 +48,29 @@ function civicrm_member_roles_schema() {
 }
 
 /**
- * Implementation of hook_uninstall().
+ * Migrate settings from Drupal to Backdrop.
  */
-function civicrm_member_roles_uninstall() {
-  variable_del('civicrm_member_roles_sync_method');
+function civicrm_member_roles_update_1000() {
+  $config = config('civicrm_member_roles.settings');
+  $config->set('sync_method', update_variable_get('civicrm_member_roles_sync_method', 0));
+  $config->save();
+
+  // Delete variables.
+  update_variable_del('civicrm_member_roles_sync_method');
 }
 
+/**
+ * Change role_id to role_name.
+ */
+function civicrm_member_roles_update_1001() {
+  if (db_table_exists('civicrm_member_roles_rules') && db_field_exists('rid')) {
+    $new_field = array(
+      'type' => 'varchar',
+      'length' => 64,
+      'not null' => TRUE,
+      'default' => '',
+    );
+
+    db_change_field('civicrm_member_roles_rules', 'rid', 'role_name', $new_field);
+  }
+}
