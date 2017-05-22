@@ -1,4 +1,4 @@
-This module provides two-way synchronization between Drupal Roles and CiviCRM based on rules defined by the administrator.
+This module provides two-way synchronization between Backdrop Roles and CiviCRM based on rules defined by the administrator.
 
 Note that for now, removing from a Role does NOT remove the user from the CiviCRM group, so be sure to remove them manually from the group if you need to do so.
 
