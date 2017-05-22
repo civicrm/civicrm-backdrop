@@ -1029,13 +1029,13 @@ function civicrm_form_alter(&$form, &$form_state, $formID) {
  * @param $form_state
  */
 function civicrm_user_admin_permissions_submit($form, &$form_state) {
-  $rid = array_search('anonymous user', $form_state['values']['role_names']);
-  if ($rid === FALSE) {
+  $role = $form_state['values']['roles']['anonymous'];
+  if ($role === FALSE) {
     return;
   }
   civicrm_initialize();
-  $roles = user_roles();
-  $permissions = array_filter($form_state['values'][$rid]);
+
+  $permissions = $form_state['values'][$role->name];
   $warning_permissions = CRM_Core_Permission::validateForPermissionWarnings($permissions);
   $warning_permission_names = array();
   foreach (module_implements('permission') as $module) {
@@ -1050,7 +1050,7 @@ function civicrm_user_admin_permissions_submit($form, &$form_state) {
   if (!empty($warning_permission_names)) {
     backdrop_set_message(t('The %1 role was assigned one or more permissions that may prove dangerous for users of that role to have. Please reconsider assigning %2 to them.',
       array(
-        '%1' => $roles[$rid],
+        '%1' => $role->label,
         '%2' => implode(', ', $warning_permission_names),
       )), 'warning');
   }
