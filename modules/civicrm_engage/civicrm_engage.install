@@ -40,18 +40,39 @@
 function civicrm_engage_enable() {
   db_query("UPDATE {system} SET weight = 110 WHERE name = 'civicrm_engage'");
   $url = url('admin/config/civicrm/civicrm_engage');
-  drupal_set_message(t('CiviCRM Engage must be <a href="@url">configured</a> before it will work properly.', array('@url' => $url)));
+  backdrop_set_message(t('CiviCRM Engage must be <a href="@url">configured</a> before it will work properly.', array('@url' => $url)));
 }
 
 /**
- * Fix the Participant Role field in the Update Event Invite Responses 
- **/
-function civicrm_engage_update_7001() {
-  civicrm_initialize();
-  $sql = "UPDATE civicrm_uf_field SET field_name = 'participant_role' WHERE ".
-    "field_name = 'participant_role_id' AND uf_group_id IN (SELECT id FROM ".
-    "civicrm_uf_group WHERE name = 'update_event_invite_responses') ";
+ * Implements hook_update_last_removed().
+ */
+function civicrm_engage_update_last_removed() {
+  return 7001;
+}
 
-  CRM_Core_DAO::executeQuery($sql);
+/**
+ * Move civicrm_engage settings from variables to config.
+ */
+function civicrm_engage_update_1000() {
+  // Migrate variables to config.
+  $config = config('civicrm_engage.settings');
+  $config->set('civicrm_engage_no_canvas_period', update_variable_get('civicrm_engage_no_canvas_period', 0));
+  $config->set("civicrm_engage_no_canvas_text", update_variable_get('civicrm_engage_no_canvass_text', "Do Not Canvas"));
+  $config->set('civicrm_engage_groupbreak_odd_even', update_variable_get('civicrm_engage_groupbreak_odd_even', 1));
+  $config->set('civicrm_engage_groupbreak_street', update_variable_get('civicrm_engage_groupbreak_street', 1));
+  $config->set('civicrm_engage_groupbreak_city', update_variable_get('civicrm_engage_groupbreak_city', 1));
+  $config->set('civicrm_engage_groupbreak_zip', update_variable_get('civicrm_engage_groupbreak_zip', 1));
+  $config->set('civicrm_engage_lines_per_group', update_variable_get('civicrm_engage_lines_per_group', 6));
+  $config->set('civicrm_engage_group_per_page', update_variable_get('civicrm_engage_group_per_page', 1));
+  $config->save();
 
+  // Delete variables.
+  update_variable_del('civicrm_engage_no_canvas_period');
+  update_variable_del('civicrm_engage_no_canvass_text');
+  update_variable_del('civicrm_engage_groupbreak_odd_even');
+  update_variable_del('civicrm_engage_groupbreak_street');
+  update_variable_del('civicrm_engage_groupbreak_city');
+  update_variable_del('civicrm_engage_groupbreak_zip');
+  update_variable_del('civicrm_engage_lines_per_group');
+  update_variable_del('civicrm_engage_group_per_page');
 }

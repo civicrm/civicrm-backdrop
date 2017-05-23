@@ -36,6 +36,18 @@
 define('CIVICRM_ENGAGE_CG_DEMOGRAPHICS_NAME', 'Demographics');
 define('CIVICRM_ENGAGE_DEMOGRAPHICS_PREFIX', 'demographics_');
 define('CIVICRM_ENGAGE_DEMOGRAPHICS_TITLE', 'Demographics');
+
+/**
+ * Implements hook_config_info().
+ */
+function civicrm_engage_config_info() {
+  $prefixes['civicrm_engage.settings'] = array(
+    'label' => t('Civicrm Engage settings'),
+    'group' => t('CiviCRM'),
+  );
+  return $prefixes;
+}
+
 function _civicrm_engage_getCustomGroupID($customGroupName) {
   require_once 'CRM/Utils/Type.php';
   $customGroupName = CRM_Utils_Type::escape($customGroupName, 'String');
@@ -222,7 +234,7 @@ function civicrm_engage_menu() {
   $items['admin/config/civicrm/civicrm_engage'] = array(
     'title' => t('Civicrm engage settings'),
     'description' => t('CiviCRM Engage Configuration'),
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('civicrm_engage_admin_settings'),
     'access arguments' => array('access civiengage settings'),
     'file' => 'civicrm_engage.admin.inc',
@@ -230,7 +242,7 @@ function civicrm_engage_menu() {
   $items['admin/config/civicrm/civicrm_engage/settings'] = array(
     'title' => t('Civicrm engage settings'),
     'description' => t('CiviCRM Engage Configuration'),
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('civicrm_engage_admin_settings'),
     'access arguments' => array('access civiengage settings'),
     'file' => 'civicrm_engage.admin.inc',
@@ -239,7 +251,7 @@ function civicrm_engage_menu() {
   $items['admin/config/civicrm/civicrm_engage/load-data'] = array(
     'title' => t('Civicrm engage load default data'),
     'description' => t('CiviCRM Engage Load Data'),
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('civicrm_engage_admin_load_data'),
     'access arguments' => array('access civiengage settings'),
     'file' => 'civicrm_engage.admin.inc',
@@ -247,5 +259,3 @@ function civicrm_engage_menu() {
   );
   return $items;
 }
-
-
