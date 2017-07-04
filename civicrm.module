@@ -121,6 +121,15 @@ function civicrm_menu() {
       'file' => 'system.admin.inc',
       'file path' => backdrop_get_path('module', 'system'),
   );
+  return $items;
+}
+
+/**
+ * Implements hook_menu_alter().
+ *
+ * Translating profile menu title dynamicaly to overide caching
+ */
+function civicrm_menu_alter(&$items) {
   $profiles = civicrm_user_profiles();
   foreach ($profiles as $profile) {
     $path = 'user/%user/edit/' . $profile['name'];
@@ -129,14 +138,12 @@ function civicrm_menu() {
       'title callback' => 'civicrm_profile_title_callback',
       'title arguments' => array((string) $profile['id'], $profile['title']),
       'page arguments' => array('civicrm_profile_form', 1,3),
-      'access arguments' => TRUE,
       'access callback' => '_civicrm_profiles_access',
-      'access arguments' => array($profile['id']),
+      'access arguments' => array((string) $profile['id']),
       'type' => MENU_LOCAL_TASK,
       'weight' => 10,
     );
   }
-  return $items;
 }
 
 /**
