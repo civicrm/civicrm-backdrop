@@ -538,6 +538,9 @@ function civicrm_on_user_page() {
   return isset($_POST['_qf_default']);
 }
 
+/**
+ * Determine if profile is part of User Account group.
+ */
 function _civicrm_profiles_access($profile_id) {
   if (!civicrm_initialize()) {
     return FALSE;
@@ -550,6 +553,9 @@ function _civicrm_profiles_access($profile_id) {
   }
 }
 
+/**
+ * Callback for hook_menu for the profile title.
+ */
 function civicrm_profile_title_callback($profile_id, $fallback) {
   if (!civicrm_initialize() || empty($profile_id)) {
     return $fallback;
@@ -559,59 +565,63 @@ function civicrm_profile_title_callback($profile_id, $fallback) {
 }
 
 /**
- * Function needing explanation.
+ * Implements hook_form_FORM_ID_alter().
  *
- * @param $account
- * @param $reset
- * @param bool $doNotProcess
- *
- * @return array
+ * Attach any relevant profile form fields to user registration form.
  */
-function civicrm_register_data($account, $reset, $doNotProcess = FALSE) {
+function civicrm_form_user_register_form_alter(&$form, &$form_state, $form_id) {
   // lets suppress key generation for all registration forms
   civicrm_key_disable();
 
-  $ctype = civicrm_get_ctype('Individual');
-  if ($account->uid) {
-    // Happens on $type == 'insert'
-    // $reset == false always
-    // $doNotProcess == false always
-    CRM_Core_BAO_UFMatch::synchronize($account, TRUE, 'Backdrop', $ctype);
-    $userID = CRM_Core_BAO_UFMatch::getContactId($account->uid);
+  $form['#attributes']['enctype'] = 'multipart/form-data';
+  $form['#validate'][] = 'civicrm_user_form_validate';
 
-    // CRM-7858
-    if (isset($account->mail)) {
-      CRM_Core_BAO_UFMatch::updateContactEmail($userID,
-        trim($account->mail)
-      );
-    }
+  $form_state['no_cache'] = TRUE;
 
-    $html = CRM_Core_BAO_UFGroup::getEditHTML($userID, NULL, 2, TRUE, $reset,NULL, $doNotProcess, $ctype);
-  }
-  else {
-    // Happens on $type == 'register'
-    $html = CRM_Core_BAO_UFGroup::getEditHTML(NULL, NULL, 1, TRUE, $reset, NULL, $doNotProcess, $ctype);
-  }
-
-  $output = array();
+  $html = CRM_Core_BAO_UFGroup::getEditHTML(NULL, '', NULL, TRUE, TRUE, NULL, FALSE, civicrm_get_ctype('Individual'));
 
   if ($html) {
-    $html           = civicrm_add_jquery($html);
-    $output['crm_profiles'] = array(
-        '#type' => 'fieldset',
-        '#title' => t('CRM profiles'),
-        '#weight' => 100,
-        '#collapsible' => FALSE,
-        '#collapsed' => FALSE,
-      );
-    $output['crm_profiles']['civicrm-profile-register'] = array(
+    $html = civicrm_add_jquery($html);
+    $form['civicrm_profile_register'] = array(
       '#type' => 'item',
       '#markup' => $html,
-      '#value' => $html,
       '#weight' => 1,
     );
   }
-  return $output;
+}
+
+/**
+ * Handler to validate CiviCRM fields on user registration form.
+ */
+function civicrm_user_form_validate($form, &$form_state) {
+  // lets suppress key generation for all validation also
+  civicrm_key_disable();
+
+  static $validated = FALSE;
+
+  if ($validated) {
+    return;
+  }
+
+  $validated = TRUE;
+
+  // check for either user/register or admin/people/create
+  $register =
+    ((arg(0) == 'user' && arg(1) == 'register') ||
+    (arg(0) == 'admin' && arg(1) == 'people' && arg(2) == 'create')
+  ) ? TRUE : FALSE;
+  $userID = NULL;
+  if (!empty($form['#user'])) {
+    $userID = CRM_Core_BAO_UFMatch::getContactId($form['#user']->uid);
+  }
+  $errors = CRM_Core_BAO_UFGroup::isValid($userID, NULL, $register);
+  if ($errors && is_array($errors)) {
+    foreach ($errors as $name => $error) {
+      form_set_error($name, $error);
+    }
+    return FALSE;
+  }
+  return TRUE;
 }
 
 /**
@@ -742,40 +752,6 @@ function _civicrm_get_user_profile_id($name) {
     ));
   }
   return $profileID;
-}
-
-/**
- * User Form Validate
- */
-function civicrm_user_form_validate($form, &$form_state) {
-  // lets suppress key generation for all validation also
-  civicrm_key_disable();
-
-  static $validated = FALSE;
-
-  if ($validated) {
-    return;
-  }
-
-  $validated = TRUE;
-
-  // check for either user/register or admin/people/create
-  $register =
-    ((arg(0) == 'user' && arg(1) == 'register') ||
-    (arg(0) == 'admin' && arg(1) == 'people' && arg(2) == 'create')
-  ) ? TRUE : FALSE;
-  $userID = NULL;
-  if (!empty($form['#user'])) {
-    $userID = CRM_Core_BAO_UFMatch::getContactId($form['#user']->uid);
-  }
-  $errors = CRM_Core_BAO_UFGroup::isValid($userID, 'civicrm-profile-register', $register);
-  if ($errors && is_array($errors)) {
-    foreach ($errors as $name => $error) {
-      form_set_error($name, $error);
-    }
-    return FALSE;
-  }
-  return TRUE;
 }
 
 /**
@@ -1002,6 +978,9 @@ function civicrm_add_jquery(&$html) {
   return $html;
 }
 
+/**
+ * Implements hook_form_alter().
+ */
 function civicrm_form_alter(&$form, &$form_state, $formID) {
   switch ($formID) {
     case 'user_admin_permissions':
@@ -1014,14 +993,6 @@ function civicrm_form_alter(&$form, &$form_state, $formID) {
         }
         CRM_Core_BAO_Navigation::resetNavigation();
       }
-      break;
-
-    case 'user_register_form':
-      $form['#attributes']['enctype'] = 'multipart/form-data';
-      $form['#validate'][] = 'civicrm_user_form_validate';
-      $output = civicrm_register_data($form['#user'], FALSE);
-      $form = array_merge($form, $output);
-      $form_state['no_cache'] = TRUE;
       break;
 
     default:
