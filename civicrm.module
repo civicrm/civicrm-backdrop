@@ -571,7 +571,7 @@ function civicrm_form_user_register_form_alter(&$form, &$form_state, $form_id) {
 
   $form_state['no_cache'] = TRUE;
 
-  $html = CRM_Core_BAO_UFGroup::getEditHTML(NULL, '', NULL, TRUE, TRUE, NULL, TRUE, civicrm_get_ctype('Individual'));
+  $html = CRM_Core_BAO_UFGroup::getEditHTML(NULL, '', NULL, TRUE, TRUE, NULL, FALSE, civicrm_get_ctype('Individual'));
 
   if ($html) {
     $html = civicrm_add_jquery($html);
