@@ -14,7 +14,7 @@
  function civicrm_member_roles_install() {
 
    $here = l(t('here'), 'admin/config/civicrm/civicrm_member_roles');
-   drupal_set_message(t('CiviCRM Member Roles Sync installed. You will need to specify sync rules !1.', array('!1' => $here)));
+   backdrop_set_message(t('CiviCRM Member Roles Sync installed. You will need to specify sync rules !1.', array('!1' => $here)));
  }
 
 /*
@@ -81,5 +81,44 @@ function civicrm_member_roles_update_1001() {
     );
 
     db_change_field('civicrm_member_roles_rules', 'rid', 'role_name', $new_field);
+  }
+}
+
+/**
+ * Translate the old integer-based data format for synchronization settings to
+ * the array-based format which supports multiple sync options.
+ */
+function civicrm_member_roles_update_1002() {
+  // Get the current sync method and see if a format update is needed.
+  $config = config('civicrm_member_roles.settings');
+  $sync_method = $config->get('civicrm_member_roles_sync_method');
+  if (in_array($sync_method, array(0, 1, 2, 3))) {
+    // Translate the old value to the new.
+    switch ($sync_method) {
+      case '0':
+        $config->set('civicrm_member_roles_sync_method', array('login'));
+        break;
+      case '1':
+        $config->set('civicrm_member_roles_sync_method', array('cron'));
+        break;
+      case '2':
+        $config->set('civicrm_member_roles_sync_method', array());
+        break;
+      case '3':
+        $config->set('civicrm_member_roles_sync_method', array('update'));
+        break;
+    }
+    $config->save();
+  }
+}
+
+/**
+ * Set default cron limit.
+ */
+function civicrm_member_roles_update_1003() {
+  $config = config('civicrm_member_roles.settings');
+  if ($config->get('civicrm_member_roles_cron_limit') == NULL) {
+    $config->set('civicrm_member_roles_cron_limit', 150);
+    $config->save();
   }
 }

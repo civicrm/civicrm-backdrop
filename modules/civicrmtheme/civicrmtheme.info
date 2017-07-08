@@ -1,6 +1,6 @@
 name = CiviCRM Theme
 description =  Define alternative themes and layouts for CiviCRM.
-version = 4.7
+version = 1.x-4.7
 backdrop = 1.x
 type = module
 package = CiviCRM

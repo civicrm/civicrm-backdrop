@@ -2,7 +2,7 @@
  +--------------------------------------------------------------------+
  | CiviCRM version 4.7                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2015                                |
+ | Copyright CiviCRM LLC (c) 2004-2017                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -27,7 +27,7 @@
   <div class="crm-clear" {if $permission EQ 'edit'}title="{ts}Edit demographics{/ts}"{/if}>
     {if $permission EQ 'edit'}
     <div class="crm-edit-help">
-      <span class="batch-edit"></span>{ts}Edit demographics{/ts}
+      <span class="crm-i fa-pencil"></span> {ts}Edit demographics{/ts}
     </div>
     {/if}
     <div class="crm-summary-row">

@@ -80,7 +80,7 @@ class civicrm_handler_filter_state_multi extends views_handler_filter_in_operato
             $loaded_list[$state_id] = $state->name;
           }
         }
-        drupal_add_js(array('civicrm_views' => array('states' => $state_html)), 'setting');
+        backdrop_add_js(array('civicrm_views' => array('states' => $state_html)), 'setting');
         $c_object = json_encode($state_html);
       }
     } // end foreach
@@ -91,7 +91,7 @@ class civicrm_handler_filter_state_multi extends views_handler_filter_in_operato
 
       $fid=md5($country_field);
       $js = '(function ($) {
-               Drupal.behaviors.civicrm_views_' . $fid . ' = {
+               Backdrop.behaviors.civicrm_views_' . $fid . ' = {
                  attach: function (context, settings) {
                    $("#edit-' . $country_field . '").change( function() {
                      var stateList = \'<option value="All">&lt;Any&gt;</option>\';
@@ -101,7 +101,7 @@ class civicrm_handler_filter_state_multi extends views_handler_filter_in_operato
                        selectedCountries = [selectedCountries];
                      }
                      $.each(selectedCountries, function(index, selectedCountry) {
-                       stateList = stateList + ((Drupal.settings.civicrm_views.states[selectedCountry])? Drupal.settings.civicrm_views.states[selectedCountry] : \'\');
+                       stateList = stateList + ((Backdrop.settings.civicrm_views.states[selectedCountry])? Backdrop.settings.civicrm_views.states[selectedCountry] : \'\');
                      });
                      $("select[name=' . $this->field . ']").empty();
                      $("select[name=' . $this->field . ']").html(stateList);
@@ -109,7 +109,7 @@ class civicrm_handler_filter_state_multi extends views_handler_filter_in_operato
                  }
                }
              })(jQuery); ';
-      drupal_add_js($js, 'inline', 'footer');
+      backdrop_add_js($js, 'inline', 'footer');
     } // end if country filter
   }
 

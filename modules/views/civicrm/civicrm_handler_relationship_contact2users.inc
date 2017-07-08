@@ -24,7 +24,7 @@
 */
 
 /**
- * Field handler to provide relationship to Drupal User ID
+ * Field handler to provide relationship to Backdrop User ID
  *
  * @ingroup civicrm_field_handlers
  */
@@ -73,4 +73,3 @@ class civicrm_handler_relationship_contact2users extends views_handler_relations
     $this->alias = $this->query->add_relationship($alias, $join, 'users');
   }
 }
-
