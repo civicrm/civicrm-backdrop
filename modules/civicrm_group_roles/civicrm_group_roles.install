@@ -24,7 +24,7 @@
 */
 
 /* @file
- * A simple module to synchronize Drupal Roles with Specified CiviCRM Groups
+ * A simple module to synchronize Backdrop Roles with Specified CiviCRM Groups
  */
 
 /**
@@ -91,5 +91,16 @@ function civicrm_group_roles_update_1000() {
     );
 
     db_change_field('civicrm_group_roles_rules', 'role_id', 'role_name', $new_field);
+  }
+}
+
+/**
+ * Add new debugging setting.
+ */
+function civicrm_group_roles_update_1001() {
+  $config = config('civicrm_group_roles.settings');
+  if ($config->get('civicrm_group_roles_debugging') == NULL) {
+    $config->set('civicrm_group_roles_debugging', 0);
+    $config->save();
   }
 }

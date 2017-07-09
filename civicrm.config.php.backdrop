@@ -14,19 +14,19 @@
  * return a default value '$confdir/default'.
  *
  * Example for a fictitious site installed at
- * http://www.drupal.org/mysite/test/ the 'settings.php' is
+ * http://www.backdrop.org/mysite/test/ the 'settings.php' is
  * searched in the following directories:
  *
- *  1. $confdir/www.drupal.org.mysite.test
- *  2. $confdir/drupal.org.mysite.test
+ *  1. $confdir/www.backdrop.org.mysite.test
+ *  2. $confdir/backdrop.org.mysite.test
  *  3. $confdir/org.mysite.test
  *
- *  4. $confdir/www.drupal.org.mysite
- *  5. $confdir/drupal.org.mysite
+ *  4. $confdir/www.backdrop.org.mysite
+ *  5. $confdir/backdrop.org.mysite
  *  6. $confdir/org.mysite
  *
- *  7. $confdir/www.drupal.org
- *  8. $confdir/drupal.org
+ *  7. $confdir/www.backdrop.org
+ *  8. $confdir/backdrop.org
  *  9. $confdir/org
  *
  * 10. $confdir/default
@@ -43,7 +43,7 @@ function civicrm_conf_init() {
     }
 
     /**
-     * We are within the civicrm module, the drupal root is 2 links
+     * We are within the civicrm module, the backdrop root is 2 links
      * above us, so use that
      */
     $currentDir = dirname( __FILE__ ) . DIRECTORY_SEPARATOR;
@@ -64,9 +64,6 @@ function civicrm_conf_init() {
         // check to see if this is under sites/all/modules
         } else if ( strpos( $currentDir, $moduleDir ) !== false ) {
             $confdir = $currentDir . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..';
-        } else if ( strpos( $currentDir, 'plugins' . DIRECTORY_SEPARATOR . 'civicrm' . DIRECTORY_SEPARATOR . 'civicrm' ) !== false ) {
-             //if its wordpress
-            $confdir = $currentDir . DIRECTORY_SEPARATOR . '..';
         } else {
             $confdir = $currentDir . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR;
         }
@@ -81,7 +78,7 @@ function civicrm_conf_init() {
         exit( );
     }
 
-    // since drupal 7, alias could be defined in sites/sites.php
+    // alias could be defined in sites/sites.php
     if ( file_exists( $confdir . "/sites.php" ) ) {
       include $confdir . "/sites.php";
     } else {
@@ -115,7 +112,7 @@ function civicrm_conf_init() {
 
 $settingsFile = civicrm_conf_init( ) . '/civicrm.settings.php';
 define('CIVICRM_SETTINGS_PATH', $settingsFile);
-$error = @include_once( $settingsFile );
+$error = include_once( $settingsFile );
 if ( $error == false ) {
     echo "Could not load the settings file at: {$settingsFile}\n";
     exit( );

@@ -3,7 +3,7 @@
  +--------------------------------------------------------------------+
  | CiviCRM version 4.7                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2015                                |
+ | Copyright CiviCRM LLC (c) 2004-2017                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -28,7 +28,7 @@
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2015
+ * @copyright CiviCRM LLC (c) 2004-2017
  * $Id$
  *
  */
@@ -60,7 +60,7 @@ function civicrm_engage_civicrm_buildForm($formName, &$form) {
     if (empty($cgID)) {
       return;
     }
-    $groupTree = &CRM_Core_BAO_CustomGroup::getTree('Individual',
+    $groupTree = CRM_Core_BAO_CustomGroup::getTree('Individual',
       NULL,
       $form->getVar('_contactId'),
       $cgID,
@@ -119,7 +119,7 @@ function civicrm_engage_civicrm_postProcess($class, &$form) {
       if (empty($cgID)) {
         return;
       }
-      $groupTree = &CRM_Core_BAO_CustomGroup::getTree('Individual',
+      $groupTree = CRM_Core_BAO_CustomGroup::getTree('Individual',
         NULL,
         $form->getVar('_contactId'),
         $cgID,
@@ -166,7 +166,7 @@ function civicrm_engage_civicrm_pageRun(&$page) {
     if(empty($contactId)) {
       $contactId = CRM_Utils_Request::retrieve('cid', 'Positive', $this, TRUE, NULL, $_REQUEST);
     }
-    $groupTree = &CRM_Core_BAO_CustomGroup::getTree('Individual',
+    $groupTree = CRM_Core_BAO_CustomGroup::getTree('Individual',
       NULL,
       $contactId,
       $cgID,

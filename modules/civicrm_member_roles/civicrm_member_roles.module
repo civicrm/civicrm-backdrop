@@ -5,7 +5,7 @@
  * @license GNU General Public License version 2 or later
  *
  * @file
- * Synchronize CiviCRM Contacts with Membership Status to a specified Drupal Role both automatically and manually.
+ * Synchronize CiviCRM Contacts with Membership Status to a specified Backdrop Role both automatically and manually.
  */
 
  /**
@@ -113,8 +113,7 @@ function civicrm_member_roles_sync_user($account) {
   if (!civicrm_initialize()) {
     return;
   }
-  $sync_method = config_get('civicrm_member_roles.settings', 'civicrm_member_roles_sync_method');
-  if ($sync_method == 0) {
+  if (in_array('login', config_get('civicrm_member_roles.settings', 'civicrm_member_roles_sync_method'), TRUE)) {
     _civicrm_member_roles_sync($account->uid);
   }
 }
@@ -126,9 +125,8 @@ function civicrm_member_roles_cron() {
   if (!civicrm_initialize(TRUE)) {
     return;
   }
-  $sync_method = config_get('civicrm_member_roles.settings', 'civicrm_member_roles_sync_method');
-  if ($sync_method == 1) {
-    _civicrm_member_roles_sync();
+  if (in_array('cron', config_get('civicrm_member_roles.settings', 'civicrm_member_roles_sync_method'), TRUE)) {
+    _civicrm_member_roles_sync(NULL, NULL, 'cron');
   }
 }
 
@@ -158,7 +156,7 @@ function civicrm_member_roles_show_rules($action = NULL, $id = NULL) {
 
   //Begin building main output table.
   $header = array('rid' => t('Rule ID'),
-    'rule_name' => t('Rule Name ("CiviMember Membership Type" --> "Drupal Role")'),
+    'rule_name' => t('Rule Name ("CiviMember Membership Type" --> "Backdrop Role")'),
     'current_code' => t('Add When Status Is'),
     'expired_code' => t('Remove When Status Is'),
     'options' => t('Operation'),
@@ -216,7 +214,7 @@ function civicrm_member_roles_manual_sync() {
   );
   $form['manual_sync']['manual_sync_submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Synchronize CiviMember Membership Types to Drupal Roles now'),
+    '#value' => t('Synchronize CiviMember Membership Types to Backdrop Roles now'),
   );
 
   return $form;
@@ -230,10 +228,10 @@ function civicrm_member_roles_manual_sync_submit($form, &$form_state) {
     return;
   }
   if (_civicrm_member_roles_sync()) {
-    backdrop_set_message(t('CiviMember Memberships and Drupal Roles have been synchronized using available rules. Note: if no association rules exist then synchronization has not been completed.'));
+    backdrop_set_message(t('CiviMember Memberships and Backdrop Roles have been synchronized using available rules. Note: if no association rules exist then synchronization has not been completed.'));
   }
   else {
-    backdrop_set_message(t('There was an error. CiviMember Memberships and Drupal Roles could not be synchronized.'), $type = 'error');
+    backdrop_set_message(t('There was an error. CiviMember Memberships and Backdrop Roles could not be synchronized.'), $type = 'error');
   }
 }
 
@@ -250,16 +248,24 @@ function civicrm_member_roles_configure() {
     '#title' => t('Settings'),
   );
   $form['settings']['civicrm_member_roles_sync_method'] = array(
-    '#type' => 'radios',
+    '#type' => 'checkboxes',
     '#title' => t('Automatic Synchronization Method'),
-    '#description' => t('Select which method CiviMember Roles Sync will use to automatically synchronize Memberships and Roles. If you choose user login/logout, you will have to run an initial "Manual Synchronization" after you create a new rule for it to be applied to all users and contacts. Leave the default setting if you are unsure which method to use.'),
+    '#description' => t('Select which method CiviMember Roles Sync will use to automatically synchronize Memberships and Roles. If you choose user login/logout, you will have to run an initial "Manual Synchronization" after you create a new rule for it to be applied to all users and contacts. If you do not select an option, automatic synchronization will be disabled. You will have to use the "Manually Synchronize" form to synchronize memberships and roles yourself. Leave the default setting if you are unsure which method to use.'),
     '#default_value' => config_get('civicrm_member_roles.settings', 'civicrm_member_roles_sync_method'),
     '#options' => array(
-      0 => t('Synchronize whenever a user logs in or logs out. This action is performed only on the user logging in or out.'),
-      1 => t('Synchronize when Drupal cron is ran. This action will be performed on all users and contacts.'),
-      3 => t('Synchronize when membership is updated.'),
-      2 => t('Disable automatic synchronization. You will have to use the "Manually Synchronize" form to synchronize memberships and roles yourself.'),
+      'login' => t('Synchronize whenever a user logs in or logs out. This action is performed only on the user logging in or out.'),
+      'cron' => t('Synchronize when Backdrop cron is ran. This action will be performed on all users and contacts.'),
+      'update' => t('Synchronize when membership is updated.'),
     ),
+  );
+  $form['settings']['civicrm_member_roles_cron_limit'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Memberships Synchronized on Cron'),
+    '#description' => t('Enter how many Memberships and Roles you would like to synchronize per cron run. Synchronization will be performed randomly. This prevents the operation from timing out when too many items are processed at once. If this is empty, all Memberships and Roles will be processed.'),
+    '#default_value' => config_get('civicrm_member_roles.settings', 'civicrm_member_roles_cron_limit'),
+    '#element_validate' => array('element_validate_integer_positive'),
+    '#size' => 15,
+    '#maxlength' => 4,
   );
 
   return system_settings_form($form);
@@ -289,7 +295,7 @@ function civicrm_member_roles_add_rule_form($form = NULL, $form_state = NULL, $i
   $form['add_rule'] = array(
     '#type' => 'fieldset',
     '#title' => t('Association Rule'),
-    '#description' => t('Choose a CiviMember Membership Type and a Drupal Role below. This will associate that Membership with the Role. If you would like the have the same Membership be associated with more than one role, you will need to add a second association rule after you have completed this one.'),
+    '#description' => t('Choose a CiviMember Membership Type and a Backdrop Role below. This will associate that Membership with the Role. If you would like the have the same Membership be associated with more than one role, you will need to add a second association rule after you have completed this one.'),
     '#tree' => TRUE,
     '#parents' => array('add_rule'),
   );
@@ -301,14 +307,14 @@ function civicrm_member_roles_add_rule_form($form = NULL, $form_state = NULL, $i
   );
   $form['add_rule']['select_role'] = array(
     '#type' => 'select',
-    '#title' => t('Select a Drupal Role'),
+    '#title' => t('Select a Backdrop Role'),
     '#options' => $roles,
     '#required' => TRUE,
   );
   $form['status_code'] = array(
     '#type' => 'fieldset',
     '#title' => t('CiviMember Status Rules'),
-    '#description' => t('Select which CiviMember Statuses will be used to add or remove from the Drupal Role. An "Add" status rule will add the above role to a user account. A "Removal" status rule will remove the above role from a user account.'),
+    '#description' => t('Select which CiviMember Statuses will be used to add or remove from the Backdrop Role. An "Add" status rule will add the above role to a user account. A "Removal" status rule will remove the above role from a user account.'),
     '#tree' => TRUE,
   );
   $form['status_code']['current'] = array(
@@ -363,14 +369,14 @@ function civicrm_member_roles_add_rule_form($form = NULL, $form_state = NULL, $i
  * Implementation of hook_validate() for the add/edit rule form.
  */
 function civicrm_member_roles_add_rule_form_validate($form, &$form_state) {
-  //Make sure there is a CiviMember Membership Type and a Drupal Role selected.
+  //Make sure there is a CiviMember Membership Type and a Backdrop Role selected.
   if (is_numeric($form_state['values']['add_rule']['select_membership']) && isset($form_state['values']['add_rule']['select_role'])) {
     if ($form_state['values']['add_rule']['select_membership'] == 0 || $form_state['values']['add_rule']['select_role'] == '') {
-      form_set_error('add_rule', t('You must select both a CiviMember Membership Type and a Drupal Role from the "Association Rule" section.'));
+      form_set_error('add_rule', t('You must select both a CiviMember Membership Type and a Backdrop Role from the "Association Rule" section.'));
     }
   }
   else {
-    form_set_error('add_rule', t('CiviMember Membership Type and Drupal Role values are invalid.'));
+    form_set_error('add_rule', t('CiviMember Membership Type and Backdrop Role values are invalid.'));
   }
 
   //Check for conflicting status rules.
@@ -460,8 +466,13 @@ function civicrm_member_roles_add_rule_form_submit($form, &$form_state) {
 /**
  * Finds members and applies roles based on the rules defined in the settings page. If the ext_uid param is defined then
  * this function will only sync one user.
+ *
+ * @param string $sync_type
+ *   Whether we are syncing on cron, login, etc. Only cron is handled at this time.
+ *
+ * @return bool
  */
-function _civicrm_member_roles_sync($ext_uid = NULL, $cid = NULL) {
+function _civicrm_member_roles_sync($ext_uid = NULL, $cid = NULL, $sync_type = NULL) {
   if (!civicrm_initialize()) {
     return;
   }
@@ -480,12 +491,22 @@ function _civicrm_member_roles_sync($ext_uid = NULL, $cid = NULL) {
   }
   //Find all contacts that have membership rules (or just use $ext_uid)
   if (empty($ext_uid) && empty($cid)) {
-    $sql = "SELECT DISTINCT uf.contact_id FROM civicrm_uf_match uf
+    // Get the number of contacts to sync at once, if we're syncing on cron.
+    $cron_limit = config_get('civicrm_member_roles.settings', 'civicrm_member_roles_cron_limit');
+    if ($sync_type == 'cron' && is_numeric($cron_limit) && $cron_limit > 0) {
+      $sql = "SELECT DISTINCT uf.contact_id FROM civicrm_uf_match uf
+      LEFT JOIN civicrm_membership m ON uf.contact_id = m.contact_id
+      WHERE m.id IS NOT NULL AND m.membership_type_id IN (" . implode(',', array_keys($memberroles)) . ")
+      ORDER BY RAND() LIMIT " . $cron_limit;
+    }
+    else {
+      $sql = "SELECT DISTINCT uf.contact_id FROM civicrm_uf_match uf
       LEFT JOIN civicrm_membership m ON uf.contact_id = m.contact_id
       WHERE m.id IS NOT NULL AND m.membership_type_id IN (" . implode(',', array_keys($memberroles)) . ")
       ORDER BY m.end_date DESC";
-    //let's prioritise those ending last as then we are more likely to get relevant ones if it doesn't complete
-    //obviously a better fix would be for it to chunk & save where it is up to
+      //let's prioritise those ending last as then we are more likely to get relevant ones if it doesn't complete
+      //obviously a better fix would be for it to chunk & save where it is up to
+    }
     $params = CRM_Core_DAO::$_nullArray;
     $errorMsg = 'unknown error';
     $errorParams = array();
@@ -652,8 +673,7 @@ function _civicrm_member_roles_get_data($type) {
 
 function civicrm_member_roles_civicrm_post($op, $objname, $objid, &$objref) {
   if ($objname == "Membership") {
-    $sync_method = config_get('civicrm_member_roles.settings', 'civicrm_member_roles_sync_method');
-    if ($sync_method == 3) {
+    if (in_array('update', config_get('civicrm_member_roles.settings', 'civicrm_member_roles_sync_method'), TRUE)) {
       _civicrm_member_roles_sync(NULL, $objref->contact_id);
     }
   }

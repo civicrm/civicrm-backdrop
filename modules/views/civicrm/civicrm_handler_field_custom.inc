@@ -44,7 +44,7 @@ class civicrm_handler_field_custom extends views_handler_field {
 
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
-    // Replicate Drupal UI for formatter options, but with CiviCRM
+    // Replicate Backdrop UI for formatter options, but with CiviCRM
     // terminology.
     $form['civicrm_custom_formatter'] = array(
       '#title' => 'Formatter',
@@ -71,8 +71,7 @@ class civicrm_handler_field_custom extends views_handler_field {
           // get the field id from the db
           if (!empty($this->definition['title'])) {
             $customFieldID = CRM_Core_DAO::getFieldValue('CRM_Core_BAO_CustomField', $this->definition['title'], 'id', 'label');
-            require_once 'CRM/Core/BAO/CustomOption.php';
-            return CRM_Core_BAO_CustomOption::getOptionLabel($customFieldID, $value);
+            return CRM_Core_BAO_CustomField::displayValue($value, $customFieldID);
           }
           // could not get custom id, lets just return what we have
           return $value;

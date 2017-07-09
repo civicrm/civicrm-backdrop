@@ -72,8 +72,8 @@ class civicrm_handler_field_event_link extends views_handler_field {
 
     $form['custom_link'] = array(
       '#type' => 'textfield',
-      '#title' => t('Custom Link to a Drupal Node'),
-      '#description' => t('Link to a Drupal Node or View, from the base path. The Event ID will be appended to the end of the link.'),
+      '#title' => t('Custom Link to a Backdrop Node'),
+      '#description' => t('Link to a Backdrop Node or View, from the base path. The Event ID will be appended to the end of the link.'),
       '#default_value' => isset($this->options['custom_link']) ? $this->options['custom_link'] : '',
       '#dependency' => array('link_to_civicrm_event' => array('custom')),
     );
@@ -160,4 +160,3 @@ class civicrm_handler_field_event_link extends views_handler_field {
     return $this->render_link(check_plain($values->{$this->field_alias}), $values);
   }
 }
-

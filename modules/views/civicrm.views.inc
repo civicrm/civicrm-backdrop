@@ -142,9 +142,8 @@ function civicrm_views_data_alter(&$data) {
  * @return String path to CiviCRM
  */
 function civicrm_views_href($text, $path, $query) {
-  civicrm_initialize();
-  require_once 'CRM/Utils/System.php';
-  return CRM_Utils_System::href($text, $path, $query);
+  $url = civicrm_views_url($path, $query);
+  return "<a href=\"$url\">$text</a>";
 }
 
 /**
@@ -159,9 +158,29 @@ function civicrm_views_href($text, $path, $query) {
  * @return string            an HTML string containing a link to the given path.
  */
 function civicrm_views_url($path, $query, $absolute = FALSE) {
-  civicrm_initialize();
-  require_once 'CRM/Utils/System.php';
-  return CRM_Utils_System::url($path, $query, $absolute);
+  // Force alphabetical order of query params, for consistent support
+  // of Backdrop aliases. This is required because $query is a string that may
+  // be coming to us in any order; but query parameter order matters when
+  // passing that query string as part of $path in url($path). Admittedly it's
+  // not common to passt the query string as part of $path in url($path) (you
+  // would normally pass it as $options['query'] in url($path, $options)), but
+  // doing so is required for Backdrop alias support.
+  if (!empty($query)) {
+    if (is_array($query)) {
+      $query_data = $query;
+    }
+    else {
+      parse_str($query, $query_data);
+    }
+    ksort($query_data);
+    $query = http_build_query($query_data);
+    $path .= "?{$query}";
+  }
+  $options = array(
+    'absolute' => $absolute,
+  );
+  $url = url($path, $options);
+  return $url;
 }
 
 /**
@@ -304,8 +323,11 @@ function civicrm_views_add_date_arguments(&$data, $value) {
  *   Array with the new custom field appended
  */
 function civicrm_views_custom_data_cache(&$data, $entity_type, $group_id, $sub_type) {
+  if (CRM_Core_Config::isUpgradeMode()) {
+    return;
+  }
   // From http://forum.civicrm.org/index.php/topic,17658.msg73901.html#msg73901, CRM-7860.
-  $tree = CRM_Core_BAO_CustomGroup::getTree($entity_type, CRM_Core_DAO::$_nullObject, NULL, $group_id, $sub_type, NULL);
+  $tree = CRM_Core_BAO_CustomGroup::getTree($entity_type, NULL, NULL, $group_id, $sub_type, NULL);
 
   $join_table = civicrm_views_get_join_table($entity_type);
   foreach ($tree as $groupkey => $current_group) {

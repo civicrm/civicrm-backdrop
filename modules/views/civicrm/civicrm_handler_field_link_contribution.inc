@@ -30,7 +30,7 @@
  *
  * civicrm_handler_field_link_contribution.inc
  * Completely customizable text that can be linked to numerous places related to the contribution.
- * View, Edit and Delete Pages, as well as a custom Drupal Link with the activity ID appended,
+ * View, Edit and Delete Pages, as well as a custom Backdrop Link with the activity ID appended,
  * which is great for linking to other views using the contribution base table.
  *
  */
@@ -53,7 +53,7 @@ class civicrm_handler_field_link_contribution extends views_handler_field {
     $options = parent::option_definition();
     $options['link_to_civicrm_contribution'] = array('default' => 'view');
     $options['custom_link'] = array('default' => '');
-    $options['link_text'] = array('default' => 'View Contribution');
+    $options['link_text'] = array('default' => '');
     return $options;
   }
 
@@ -68,22 +68,24 @@ class civicrm_handler_field_link_contribution extends views_handler_field {
         'delete' => t('Link to Delete Contribution'),
         'custom' => t('Link to a Custom Node'),
       ),
-      '#default_value' => !empty($this->options['link_to_civicrm_contribution']),
+      '#default_value' => $this->options['link_to_civicrm_contribution'],
+      '#required' => TRUE,
     );
 
     $form['custom_link'] = array(
       '#type' => 'textfield',
-      '#title' => t('Custom Link to a Drupal Node'),
-      '#description' => t('Link to a Drupal Node or View, from the base path. The Contribution ID will be appended to the end of the link.'),
+      '#title' => t('Custom Link to a Backdrop Node'),
+      '#description' => t('Link to a Backdrop Node or View, from the base path. The Contribution ID will be appended to the end of the link.'),
       '#default_value' => isset($this->options['custom_link']) ? $this->options['custom_link'] : '',
-      '#dependency' => array('link_to_civicrm_contribution' => array('custom')),
+      '#dependency' => array('edit-options-link-to-civicrm-contribution' => array('custom')),
     );
 
     $form['link_text'] = array(
       '#type' => 'textfield',
-      '#title' => t('Links Text'),
+      '#title' => t('Link Text'),
       '#description' => t('The text that will display in the field with the link.'),
       '#default_value' => isset($this->options['link_text']) ? $this->options['link_text'] : '',
+      '#required' => TRUE,
     );
   }
 
@@ -148,4 +150,3 @@ class civicrm_handler_field_link_contribution extends views_handler_field {
     return $this->render_link(NULL, $values);
   }
 }
-

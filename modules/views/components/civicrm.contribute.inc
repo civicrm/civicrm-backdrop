@@ -217,6 +217,7 @@ function _civicrm_contribute_data(&$data, $enabled) {
     'field' => array(
       'handler' => 'civicrm_handler_field_money',
       'click sortable' => TRUE,
+      'currency field' => 'currency',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_numeric',
@@ -237,6 +238,7 @@ function _civicrm_contribute_data(&$data, $enabled) {
     'field' => array(
       'handler' => 'civicrm_handler_field_money',
       'click sortable' => TRUE,
+      'currency field' => 'currency',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_numeric',
@@ -256,6 +258,7 @@ function _civicrm_contribute_data(&$data, $enabled) {
     'field' => array(
       'handler' => 'civicrm_handler_field_money',
       'click sortable' => TRUE,
+      'currency field' => 'currency',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_numeric',
@@ -276,6 +279,7 @@ function _civicrm_contribute_data(&$data, $enabled) {
     'field' => array(
       'handler' => 'civicrm_handler_field_money',
       'click sortable' => TRUE,
+      'currency field' => 'currency',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_numeric',
@@ -641,6 +645,7 @@ function _civicrm_contribute_data(&$data, $enabled) {
     'field' => array(
       'handler' => 'civicrm_handler_field_money',
       'click sortable' => TRUE,
+      'currency field' => 'currency',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument',
@@ -766,6 +771,7 @@ function _civicrm_contribute_data(&$data, $enabled) {
     'field' => array(
       'handler' => 'civicrm_handler_field_money',
       'click sortable' => TRUE,
+      'currency field' => 'currency',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument',
@@ -937,6 +943,26 @@ function _civicrm_contribute_data(&$data, $enabled) {
     'title' => 'Recurring Contribution End Date',
       'name' => 'end_date',
     ));
+  //Prcocessor ID
+  $data['civicrm_contribution_recur']['processor_id'] = array(
+    'title' => t('Processor ID'),
+    'help' => t('The Processor ID of the Recurring Contribution'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+      'numeric' => TRUE,
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+      'allow empty' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
   //Unique Transaction ID
   $data['civicrm_contribution_recur']['trxn_id'] = array(
     'title' => t('Unique Transaction ID'),
@@ -1149,6 +1175,7 @@ function _civicrm_contribute_data(&$data, $enabled) {
     'field' => array(
       'handler' => 'civicrm_handler_field_money',
       'click sortable' => TRUE,
+      'currency field' => 'currency',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_numeric',
@@ -1389,6 +1416,7 @@ function _civicrm_contribute_data(&$data, $enabled) {
     'field' => array(
       'handler' => 'civicrm_handler_field_money',
       'click sortable' => TRUE,
+      'currency field' => 'currency',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_numeric',

@@ -1,6 +1,6 @@
 name = CiviGroup Roles Sync
-description = Sync Drupal Roles to CiviCRM Groups.
-version = 4.7
+description = Sync Backdrop Roles to CiviCRM Groups.
+version = 1.x-4.7
 backdrop = 1.x
 type = module
 package = CiviCRM

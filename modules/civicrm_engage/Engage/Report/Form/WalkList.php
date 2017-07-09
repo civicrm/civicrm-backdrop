@@ -3,7 +3,7 @@
  +--------------------------------------------------------------------+
  | CiviCRM version 4.7                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2015                                |
+ | Copyright CiviCRM LLC (c) 2004-2017                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -28,7 +28,7 @@
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2015
+ * @copyright CiviCRM LLC (c) 2004-2017
  * @copyright DharmaTech  (c) 2009
  * $Id$
  *
@@ -418,6 +418,7 @@ class Engage_Report_Form_WalkList extends Engage_Report_Form_List {
   }
 
   function executePrintmode($rows) {
+    $config = config('civicrm_engage.settings');
     //only get these last contribution related variables in print mode if selected on previous form
     if (array_key_exists('civicrm_contribution_cont_receive_date', $rows[0])) {
       $receiveDate = ', date_received   DATE';
@@ -579,7 +580,7 @@ class Engage_Report_Form_WalkList extends Engage_Report_Form_List {
       ),
     );
 
-    if (variable_get('civicrm_engage_groupbreak_street', "1") != 1) {
+    if ($config->get('civicrm_engage_groupbreak_street') != 1) {
       $pdfHeaders['street_name']['title'] = 'Street';
     }
     if ($receiveDate) {
@@ -599,11 +600,11 @@ class Engage_Report_Form_WalkList extends Engage_Report_Form_List {
     while ($dao->fetch()) {
 
       if (strtolower($state) != strtolower($dao->state)
-        || (variable_get('civicrm_engage_groupbreak_city', "1") == 1 && strtolower($city) != strtolower($dao->city))
-        || (variable_get('civicrm_engage_groupbreak_zip', "1") == 1 && strtolower($zip) != strtolower($dao->zip))
-        || (variable_get('civicrm_engage_groupbreak_street', "1") == 1 && strtolower($street_name) != strtolower($dao->street_name))
-        || (variable_get('civicrm_engage_groupbreak_odd_even', "1") == 1 && $odd != $dao->odd)
-        || $pageRow > variable_get('civicrm_engage_lines_per_group', "6") - 1
+        || ($config->get('civicrm_engage_groupbreak_city') == 1 && strtolower($city) != strtolower($dao->city))
+        || ($config->get('civicrm_engage_groupbreak_zip') == 1 && strtolower($zip) != strtolower($dao->zip))
+        || ($config->get('civicrm_engage_groupbreak_street') == 1 && strtolower($street_name) != strtolower($dao->street_name))
+        || ($config->get('civicrm_engage_groupbreak_odd_even') == 1 && $odd != $dao->odd)
+        || $pageRow > $config->get('civicrm_engage_lines_per_group') - 1
       ) {
         $state       = $dao->state;
         $city        = $dao->city;
@@ -613,18 +614,18 @@ class Engage_Report_Form_WalkList extends Engage_Report_Form_List {
         $pageRow     = 0;
         $groupRow['city_zip'] = '';
         $groupRow['org'] = $this->_orgName;
-        if (variable_get('civicrm_engage_groupbreak_street', "1") == 1) {
+        if ($config->get('civicrm_engage_groupbreak_street') == 1) {
           $groupRow['street_name'] = $street_name;
         }
-        if (variable_get('civicrm_engage_groupbreak_city', "1") == 1) {
+        if ($config->get('civicrm_engage_groupbreak_city') == 1) {
           $groupRow['city_zip'] .= $city . ', ';
         }
         $groupRow['city_zip'] .= $state;
         //don't give zip or odd-even if not grouped on
-        if (variable_get('civicrm_engage_groupbreak_zip', "1") == 1) {
+        if ($config->get('civicrm_engage_groupbreak_zip') == 1) {
           $groupRow['city_zip'] .= ' ' . $zip;
         }
-        if (variable_get('civicrm_engage_groupbreak_odd_even', "1") == 1) {
+        if ($config->get('civicrm_engage_groupbreak_odd_even') == 1) {
           $groupRow['odd'] = $odd ? 'Odd' : 'Even';
         }
         $groupCounts++;
@@ -632,10 +633,10 @@ class Engage_Report_Form_WalkList extends Engage_Report_Form_List {
       }
 
       // if admin settings have been defined to specify not to canvas people for a period change date to specified text
-      if (variable_get('civicrm_engage_no_canvas_period', "0") > 0 && $dao->date_received > 0
-        && ((strtotime("now") - strtotime($dao->date_received)) / 60 / 60 / 24 / 30) < variable_get('civicrm_engage_no_canvas_period', "0")
+      if ($config->get('civicrm_engage_no_canvas_period') > 0 && $dao->date_received > 0
+        && ((strtotime("now") - strtotime($dao->date_received)) / 60 / 60 / 24 / 30) < $config->get('civicrm_engage_no_canvas_period')
       ) {
-        $dao->date_received = variable_get('civicrm_engage_no_canvass_text', "Do Not Canvass");
+        $dao->date_received = $config->get('civicrm_engage_no_canvass_text');
       }
 
       $pdfRow = array();
@@ -656,7 +657,7 @@ class Engage_Report_Form_WalkList extends Engage_Report_Form_List {
 
       $pageRow++;
     }
-    if (variable_get('civicrm_engage_group_per_page', "1")) {
+    if ($config->get('civicrm_engage_group_per_page')) {
       $this->assign('newgroupdiv', 'class="page"');
     }
     $this->assign('pageTotal', $groupCounts);
@@ -666,4 +667,3 @@ class Engage_Report_Form_WalkList extends Engage_Report_Form_List {
     $this->assign('groupRows', $groupRows);
   }
 }
-
