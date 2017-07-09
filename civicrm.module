@@ -865,6 +865,7 @@ function civicrm_autoload_info() {
     'civicrm_handler_field_event' => 'modules/views/civicrm/civicrm_handler_field_event.inc',
     'civicrm_handler_field_event_link' => 'modules/views/civicrm/civicrm_handler_field_event_link.inc',
     'civicrm_handler_field_custom_file' => 'modules/views/civicrm/civicrm_handler_field_file.inc',
+    'civicrm_handler_field_im' => 'modules/views/civicrm/civicrm_handler_field_im.inc',
     'civicrm_handler_field_link' => 'modules/views/civicrm/civicrm_handler_field_link.inc',
     'civicrm_handler_field_link_activity' => 'modules/views/civicrm/civicrm_handler_field_link_activity.inc',
     'civicrm_handler_field_link_contact' => 'modules/views/civicrm/civicrm_handler_field_link_contact.inc',
@@ -885,6 +886,7 @@ function civicrm_autoload_info() {
     'civicrm_handler_field_pseudo_constant' => 'modules/views/civicrm/civicrm_handler_field_pseudo_constant.inc',
     'civicrm_handler_field_relationship_type' => 'modules/views/civicrm/civicrm_handler_field_relationship_type.inc',
     'civicrm_handler_field_state' => 'modules/views/civicrm/civicrm_handler_field_state.inc',
+    'civicrm_handler_field_website' => 'modules/views/civicrm/civicrm_handler_field_website.inc',
 
     // filter handlers
     'civicrm_handler_filter_country_multi' => 'modules/views/civicrm/civicrm_handler_filter_country_multi.inc',
@@ -894,6 +896,7 @@ function civicrm_autoload_info() {
     'civicrm_handler_filter_domain' => 'modules/views/civicrm/civicrm_handler_filter_domain.inc',
     'civicrm_handler_filter_encounter_medium' => 'modules/views/civicrm/civicrm_handler_filter_encounter_medium.inc',
     'civicrm_handler_filter_group_status' => 'modules/views/civicrm/civicrm_handler_filter_group_status.inc',
+    'civicrm_handler_filter_option' => 'modules/views/civicrm/civicrm_handler_filter_option.inc',
     'civicrm_handler_filter_pseudo_constant' => 'modules/views/civicrm/civicrm_handler_filter_pseudo_constant.inc',
     'civicrm_handler_filter_relationship_type' => 'modules/views/civicrm/civicrm_handler_filter_relationship_type.inc',
     'civicrm_handler_filter_state_multi' => 'modules/views/civicrm/civicrm_handler_filter_state_multi.inc',
@@ -902,11 +905,13 @@ function civicrm_autoload_info() {
     'civicrm_handler_relationship' => 'modules/views/civicrm/civicrm_handler_relationship.inc',
     'civicrm_handler_relationship_address' => 'modules/views/civicrm/civicrm_handler_relationship_address.inc',
     'civicrm_handler_relationship_contact2users' => 'modules/views/civicrm/civicrm_handler_relationship_contact2users.inc',
-    'civicrm_handler_relationship_memberships_contributionscivicrm_handler_relationship_location' => 'modules/views/civicrm/civicrm_handler_relationship_location.inc',
+    'civicrm_handler_relationship_im' => 'modules/views/civicrm/civicrm_handler_relationship_im.inc',
+    'civicrm_handler_relationship_location' => 'modules/views/civicrm/civicrm_handler_relationship_location.inc',
     'civicrm_handler_relationship_mail' => 'modules/views/civicrm/civicrm_handler_relationship_mail.inc',
     'civicrm_handler_relationship_memberships_contributions' => 'modules/views/civicrm/civicrm_handler_relationship_memberships_contributions.inc',
     'civicrm_handler_relationship_phone' => 'modules/views/civicrm/civicrm_handler_relationship_phone.inc',
     'civicrm_handler_relationship_relationship' => 'modules/views/civicrm/civicrm_handler_relationship_relationship.inc',
+    'civicrm_handler_relationship_website' => 'modules/views/civicrm/civicrm_handler_relationship_website.inc',
 
     // sort handlers
     'civicrm_handler_sort_address_pseudoconstant' => 'modules/views/civicrm/civicrm_handler_sort_address_pseudoconstant.inc',
