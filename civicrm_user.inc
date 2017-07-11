@@ -65,20 +65,20 @@ function civicrm_user_insert($account) {
     return;
   }
 
-  $config = CRM_Core_Config::singleton();
-  if ($config->inCiviCRM) {
+  CRM_Core_BAO_UFMatch::synchronize($account, FALSE, 'Backdrop', civicrm_get_ctype('Individual'));
+
+  // As per CRM-7858, the email address in CiviCRM isn't always set
+  // with a call to synchronize(). So we force this through.
+  $contact_id = CRM_Core_BAO_UFMatch::getContactId($account->id());
+  if (empty($contact_id)) {
     return;
   }
+  CRM_Core_BAO_UFMatch::updateContactEmail($contact_id, trim($account->mail));
 
-  // Did civicrm generate this page, or is it via a user hook?
-  if (civicrm_on_user_page()) {
-    civicrm_register_data($account, FALSE);
-  }
-  else {
-    CRM_Core_BAO_UFMatch::synchronize($account, FALSE, 'Backdrop',
-      civicrm_get_ctype('Individual')
-    );
-  }
+  // Process any profile form fields that may have been submitted.
+  // In particular, this will pick up form fields that were submitted on the user_registration page.
+  CRM_Core_BAO_UFGroup::getEditHTML($contact_id, '', 2, TRUE, FALSE, NULL, FALSE, civicrm_get_ctype('Individual'));
+
 }
 
 /**
