@@ -11,17 +11,17 @@ function civicrm_engage_admin_settings($form, $form_state) {
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
   );
-  $form['last_donate']['civicrm_engage_no_canvas_period'] = array(
+  $form['last_donate']['civicrm_engage_no_canvass_period'] = array(
     '#title' => t("Exclusion Period"),
     '#type' => 'textfield',
     '#description' => t('If you wish to leave someone alone for a period after their last donation please enter it here (in months). 0 means disabled'),
-    '#default_value' => $config->get('civicrm_engage_no_canvas_period'),
+    '#default_value' => $config->get('civicrm_engage_no_canvass_period'),
   );
   $form['last_donate']['civicrm_engage_no_canvass_text'] = array(
     '#title' => t("Text when within exclusion period"),
     '#type' => 'textfield',
     '#description' => t('Text to put in if contact not to be canvassed'),
-    '#default_value' => $config->get('civicrm_engage_no_canvas_text'),
+    '#default_value' => $config->get('civicrm_engage_no_canvass_text'),
   );
   $form['break_settings'] = array(
     '#type' => 'fieldset',

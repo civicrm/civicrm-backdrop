@@ -632,9 +632,9 @@ class Engage_Report_Form_WalkList extends Engage_Report_Form_List {
         $groupRows[$groupCounts] = $groupRow;
       }
 
-      // if admin settings have been defined to specify not to canvas people for a period change date to specified text
-      if ($config->get('civicrm_engage_no_canvas_period') > 0 && $dao->date_received > 0
-        && ((strtotime("now") - strtotime($dao->date_received)) / 60 / 60 / 24 / 30) < $config->get('civicrm_engage_no_canvas_period')
+      // if admin settings have been defined to specify not to canvass people for a period change date to specified text
+      if ($config->get('civicrm_engage_no_canvass_period') > 0 && $dao->date_received > 0
+        && ((strtotime("now") - strtotime($dao->date_received)) / 60 / 60 / 24 / 30) < $config->get('civicrm_engage_no_canvass_period')
       ) {
         $dao->date_received = $config->get('civicrm_engage_no_canvass_text');
       }

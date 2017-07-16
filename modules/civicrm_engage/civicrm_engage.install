@@ -56,8 +56,8 @@ function civicrm_engage_update_last_removed() {
 function civicrm_engage_update_1000() {
   // Migrate variables to config.
   $config = config('civicrm_engage.settings');
-  $config->set('civicrm_engage_no_canvas_period', update_variable_get('civicrm_engage_no_canvas_period', 0));
-  $config->set("civicrm_engage_no_canvas_text", update_variable_get('civicrm_engage_no_canvass_text', "Do Not Canvas"));
+  $config->set('civicrm_engage_no_canvass_period', update_variable_get('civicrm_engage_no_canvas_period', 0));
+  $config->set("civicrm_engage_no_canvass_text", update_variable_get('civicrm_engage_no_canvass_text', "Do Not Canvass"));
   $config->set('civicrm_engage_groupbreak_odd_even', update_variable_get('civicrm_engage_groupbreak_odd_even', 1));
   $config->set('civicrm_engage_groupbreak_street', update_variable_get('civicrm_engage_groupbreak_street', 1));
   $config->set('civicrm_engage_groupbreak_city', update_variable_get('civicrm_engage_groupbreak_city', 1));
