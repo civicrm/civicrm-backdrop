@@ -47,6 +47,7 @@ function civicrm_html_head() {
   else {
     CRM_Core_Resources::singleton()->addCoreStyles();
   }
+  backdrop_add_css(backdrop_get_path('module', 'civicrm') . '/css/civicrm-backdrop.css', array( 'group' => 'CSS_DEFAULT', 'type' => 'file', 'weight' => 900 ));
 }
 
 /**
