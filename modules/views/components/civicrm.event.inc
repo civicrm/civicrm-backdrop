@@ -698,7 +698,7 @@ function _civicrm_event_data(&$data, $enabled) {
 
   $data['civicrm_participant_payment']['contribution_id'] = array(
     'title' => t('Participant Contribution Id'),
-    'help' => t('The numeric ID of the Participant\'s Contribution (for event fees).'),
+    'help' => t("The numeric ID of the Participant's Contribution (for event fees)."),
     'field' => array(
       'handler' => 'views_handler_field_numeric',
       'click sortable' => TRUE,
