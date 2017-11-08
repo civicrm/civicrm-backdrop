@@ -5,3 +5,5 @@ https://github.com/civicrm/civicrm-core .)
 At time of writing, these tests execute within the context of the default
 Backdrop database.  Consequently, you must be quite careful to write tests
 which don't leave a mess in the database.
+
+This sentence is a test. It shouldn't be merged.
