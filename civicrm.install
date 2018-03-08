@@ -64,15 +64,15 @@ function civicrm_requirements($phase) {
     $civicrm_path = substr_replace($civicrm_path, '', $pos, strlen($civicrm_path));
   }
 
-  $url = $base_url . '/' . $civicrm_path . 'install/index.php';
+  $url = $base_url . '/' . $civicrm_path . 'install/index.php?civicrm_install_type=backdrop';
 
   $settings = glob('civicrm.settings.php');
   $problems = array();
   if (empty($settings) && $phase == 'install') {
     $problems[] = array(
-      'title' => t('CiviCRM settings does not exist'),
+      'title' => t('CiviCRM settings does not exist.'),
       'value' =>
-      t('CiviCRM settings file does not exist. It should be created by CiviCRM <a href="!link">install</a>',
+      t('Please <a href="!link">install</a> CiviCRM to create the settings file.',
         array('!link' => $url)),
       'severity' => REQUIREMENT_ERROR,
     );
