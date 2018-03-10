@@ -37,7 +37,7 @@ function civicrm_install() {
 }
 
 /**
- * Implements hook_uninstall( )
+ * Implements hook_uninstall().
  */
 function civicrm_uninstall() {
   require_once 'civicrm.module';
