@@ -23,7 +23,7 @@
  | GNU Affero General Public License or the licensing of CiviCRM,     |
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
-*/
+ */
 
 /**
  *
@@ -37,7 +37,7 @@ function civicrm_install() {
 }
 
 /**
- * Implementation of hook_uninstall( )
+ * Implements hook_uninstall( )
  */
 function civicrm_uninstall() {
   require_once 'civicrm.module';
@@ -60,7 +60,7 @@ function civicrm_requirements($phase) {
   //remove the last occurrence of 'backdrop' from path
   $pos = strrpos($civicrm_path, 'backdrop');
 
-  if ($pos !== false) {
+  if ($pos !== FALSE) {
     $civicrm_path = substr_replace($civicrm_path, '', $pos, strlen($civicrm_path));
   }
 
@@ -69,10 +69,11 @@ function civicrm_requirements($phase) {
   $settings = glob('civicrm.settings.php');
   $problems = array();
   if (empty($settings) && $phase == 'install') {
+    $t = get_t();
     $problems[] = array(
-      'title' => t('CiviCRM settings does not exist.'),
+      'title' => $t('CiviCRM settings does not exist.'),
       'value' =>
-      t('Please <a href="!link">install</a> CiviCRM to create the settings file.',
+      $t('Please <a href="!link">install</a> CiviCRM to create the settings file.',
         array('!link' => $url)),
       'severity' => REQUIREMENT_ERROR,
     );
