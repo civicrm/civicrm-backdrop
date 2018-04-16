@@ -124,10 +124,10 @@ function civicrm_user_delete($account) {
  */
 function civicrm_user_profiles() {
   if (!civicrm_initialize()) {
-    return;
+    return array();
   }
 
-  $allUFGroups = CRM_Core_BAO_UFGroup::getModuleUFGroup('User Account', 0, TRUE, CRM_Core_Permission::VIEW, array('id', 'name', 'title', 'is_active' ));
+  $allUFGroups = CRM_Core_BAO_UFGroup::getModuleUFGroup('User Account', 0, TRUE, CRM_Core_Permission::VIEW, array('id', 'name', 'title', 'is_active'));
   $ufGroups = array();
 
   foreach ($allUFGroups as $key => $value) {

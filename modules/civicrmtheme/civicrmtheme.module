@@ -34,7 +34,7 @@
  */
 
 /**
- * Implements hook_config_info()
+ * Implements hook_config_info().
  */
 function civicrmtheme_config_info() {
   $prefixes['civicrmtheme.settings'] = array(

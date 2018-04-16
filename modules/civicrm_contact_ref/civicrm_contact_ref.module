@@ -1,8 +1,9 @@
 <?php
 
 /**
- * Implementation of hook_menu, retrieve contacts from civicrm for
- * autocomplete widget.
+ * Implements hook_menu().
+ *
+ * Retrieve contacts from civicrm for autocomplete widget.
  */
 function civicrm_contact_ref_menu() {
   $items = array();
@@ -17,7 +18,7 @@ function civicrm_contact_ref_menu() {
 }
 
 /**
- * Implements hook_field_info
+ * Implements hook_field_info().
  */
 function civicrm_contact_ref_field_info() {
   return array(

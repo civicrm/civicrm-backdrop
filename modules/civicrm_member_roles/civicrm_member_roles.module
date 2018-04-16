@@ -8,16 +8,16 @@
  * Synchronize CiviCRM Contacts with Membership Status to a specified Backdrop Role both automatically and manually.
  */
 
- /**
-  * Implements hook_config_info().
-  */
- function civicrm_member_roles_config_info() {
-   $prefixes['civicrm_member_roles.settings'] = array(
-     'label' => t('CiviCRM Member Roles settings'),
-     'group' => t('CiviCRM'),
-   );
-   return $prefixes;
- }
+/**
+ * Implements hook_config_info().
+ */
+function civicrm_member_roles_config_info() {
+  $prefixes['civicrm_member_roles.settings'] = array(
+    'label' => t('CiviCRM Member Roles settings'),
+    'group' => t('CiviCRM'),
+  );
+  return $prefixes;
+}
 
 /**
  * Implements hook_menu().

@@ -28,16 +28,16 @@
  * A simple module that adds a user to groups based on Role.
  */
 
- /**
-  * Implements hook_config_info().
-  */
- function civicrm_group_roles_config_info() {
-   $prefixes['civicrm_group_roles.settings'] = array(
-     'label' => t('CiviCRM Group Roles settings'),
-     'group' => t('CiviCRM'),
-   );
-   return $prefixes;
- }
+/**
+ * Implements hook_config_info().
+*/
+function civicrm_group_roles_config_info() {
+  $prefixes['civicrm_group_roles.settings'] = array(
+    'label' => t('CiviCRM Group Roles settings'),
+    'group' => t('CiviCRM'),
+    );
+  return $prefixes;
+}
 
 /**
  * Implements hook_user_insert().
@@ -193,7 +193,7 @@ function civicrm_group_roles_civicrm_post($op, $objectName, $objectId, &$objectR
   $rolesProcessed = array();
   foreach ($groupRoles as $groupRole) {
     $role_name = $groupRole->role_name;
-    foreach ($objectRef AS $contact_id) {
+    foreach ($objectRef as $contact_id) {
       if (isset($rolesProcessed[$role_name])) {
         continue;
       }
@@ -577,7 +577,7 @@ function civicrm_group_roles_add_rule_form_submit($form, &$form_state) {
  *
  * @param array $roles
  *   list of role to add/remove
- * @param object $user
+ * @param object $account
  *   Backdrop user object
  * @param string $op
  *   either add or remove
@@ -616,7 +616,7 @@ function civicrm_group_roles_add_remove_groups($account, $roles, $op) {
       foreach ($roles as $role) {
 
         // Find the group(s) for the role
-        $result = db_select('civicrm_group_roles_rules', 'cgr' )->fields( 'cgr', array('group_id') )->condition('role_name', $role)->execute()->fetchAll();
+        $result = db_select('civicrm_group_roles_rules', 'cgr')->fields('cgr', array('group_id'))->condition('role_name', $role)->execute()->fetchAll();
         $groups = _civicrm_group_roles_validate_groups($result);
         foreach ($groups as $group) {
           //add the contact
@@ -629,14 +629,12 @@ function civicrm_group_roles_add_remove_groups($account, $roles, $op) {
           }
 
           if ($result['is_error'] > 0) {
-            $msg = 'Error: Unable to sync role @role';
-            $variables = array('@role' => $role);
-            watchdog('civicrm_group_roles', $msg, $variables, WATCHDOG_ERROR);
-            if ( $debug_mode ) {
-              backdrop_set_message( t( 'Error: Unable to sync role %role', array( '%role' => $role ) ) );
+            watchdog('civicrm_group_roles', 'Error: Unable to sync role @role', array('@role' => $role), WATCHDOG_ERROR);
+            if ($debug_mode) {
+              backdrop_set_message(t('Error: Unable to sync role %role', array('%role' => $role)));
             }
           }
-          elseif ( $debug_mode && $result['values'][$txt] > 0 ) {
+          elseif ($debug_mode && $result['values'][$txt] > 0) {
             backdrop_set_message("$txt user $account->name Group: $role");
             backdrop_set_message(var_export($result, TRUE));
           }
@@ -650,11 +648,9 @@ function civicrm_group_roles_add_remove_groups($account, $roles, $op) {
     } //end if contact_id
 
     else {
-      $msg = 'CiviCRM contact not found for Backdrop user ID @id';
-      $variables = array('@id' => $user->uid);
-      watchdog('civicrm_group_roles', $msg, $variables, WATCHDOG_ERROR);
+      watchdog('civicrm_group_roles', 'CiviCRM contact not found for Backdrop user ID @id', array('@id' => $user->uid), WATCHDOG_ERROR);
       if ($debug_mode) {
-        backdrop_set_message(t($msg, $variables));
+        backdrop_set_message(t('CiviCRM contact not found for Backdrop user ID @id', array('@id' => $user->uid)));
       }
     }
 

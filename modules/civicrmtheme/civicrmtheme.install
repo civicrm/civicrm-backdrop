@@ -67,7 +67,6 @@ function civicrmtheme_uninstall() {
 /**
  * Move civicrmtheme settings from variables to config.
  */
-
 function civicrmtheme_update_1000() {
   // Migrate variables to config.
   $config = config('civicrmtheme.settings');

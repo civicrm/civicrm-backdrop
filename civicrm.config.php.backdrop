@@ -46,8 +46,8 @@ function civicrm_conf_init() {
    * above us, so use that
    */
   $currentDir = dirname(__FILE__) . DIRECTORY_SEPARATOR;
-  if ( file_exists($currentDir . 'settings_location.php')) {
-      include $currentDir . 'settings_location.php';
+  if (file_exists($currentDir . 'settings_location.php')) {
+    include $currentDir . 'settings_location.php';
   }
 
   if (defined('CIVICRM_CONFDIR') && !isset($confdir)) {

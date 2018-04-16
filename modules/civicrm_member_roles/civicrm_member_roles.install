@@ -8,16 +8,15 @@
  * Install CiviMember Role Sync database table and provide hook_uninstall.
  */
 
- /**
-  * Implements hook_install().
-  */
- function civicrm_member_roles_install() {
+/**
+ * Implements hook_install().
+ */
+function civicrm_member_roles_install() {
+  $here = l(t('here'), 'admin/config/civicrm/civicrm_member_roles');
+  backdrop_set_message(t('CiviCRM Member Roles Sync installed. You will need to specify sync rules !1.', array('!1' => $here)));
+}
 
-   $here = l(t('here'), 'admin/config/civicrm/civicrm_member_roles');
-   backdrop_set_message(t('CiviCRM Member Roles Sync installed. You will need to specify sync rules !1.', array('!1' => $here)));
- }
-
-/*
+/**
  * Implements hook_enable().
  */
 function civicrm_member_roles_enable() {
