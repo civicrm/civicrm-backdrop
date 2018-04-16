@@ -1,34 +1,28 @@
 <?php
 
 /**
- * @file
- * Contains the Calendar row style plugin.
- *
- * This plugin takes the view results, finds the date value for each,
- * then compares that date to the date range for the current view.
- * Items that started before or ended after the current date range
- * are shortened to the current range. Items that extend over more
- * than one day are cloned to create a calendar item for each day.
- * The resulting array of results (which may have a different number
- * of items than the original view result) are then passed back
- * to the style plugin so they can be displayed in a calendar.
+ * @file: This file is no longer needed and does not work with the current version of calendar
+ * @todo: Remove in future version of CiviCRM
  */
 
 /**
  * Plugin which creates a view on the resulting object
  * and formats it as a Calendar node.
  */
-class calendar_plugin_row_civicrm extends calendar_plugin_row {
+class calendar_plugin_row_civicrm_event extends calendar_plugin_row_node {
   // Basic properties that let the row style follow relationships.
-  var $base_table = '';
+  var $base_table = 'civicrm_event';
   var $base_field = 'id';
+
+  // Stores the nodes loaded with pre_render.
+  var $nodes = array();
   public function construct() {
     parent::construct();
     if (!civicrm_initialize()) {
       return;
     }
-    $this->base_table = $this->definition['base'][0];
   }
+
   public function option_definition() {
     $options = parent::option_definition();
     $options['date_fields'] = array('default' => array());
@@ -62,32 +56,58 @@ class calendar_plugin_row_civicrm extends calendar_plugin_row {
       '#description' => t('Set a hex color value (like #ffffff) to use in the calendar legend for each content type. Items with empty values will have no stripe in the calendar and will not be added to the legend.'),
     );
     $form['colors']['legend'] = array(
-      '#type' => 'value',
-      '#value' => '',
+      '#title' => t('Stripes'),
+      '#description' => t('Add stripes to calendar items.'),
+      '#type' => 'select',
+      '#options' => array('' => t('None')),
+      '#default_value' => $this->options['colors']['legend'],
     );
+    $colors = $this->options['colors']['calendar_colors_type'];
+    $type_names = node_type_get_names();
+    foreach ($type_names as $key => $name) {
+      $form['colors']['calendar_colors_type'][$key] = array(
+        '#title' => $name,
+        '#type' => 'textfield',
+        '#default_value' => isset($colors[$key]) ? $colors[$key] : '#ffffff',
+        '#size' => 7,
+        '#maxlength' => 7,
+        '#element_validate' => array('calendar_validate_hex_color'),
+        '#dependency' => array('edit-row-options-colors-legend' => array('type')),
+        '#prefix' => '<div class="calendar-colorpicker-wrapper">',
+        '#suffix' => '<div class="calendar-colorpicker"></div></div>',
+        '#attributes' => array('class' => array('edit-calendar-colorpicker')),
+        '#attached' => array(
+          // Add Farbtastic color picker.
+          'library' => array(
+            array('system', 'farbtastic'),
+          ),
+          // Add javascript to trigger the colorpicker.
+          'js' => array(backdrop_get_path('module', 'calendar') . '/js/calendar_colorpicker.js'),
+        ),
+      );
+    }
   }
 
   public function pre_render($values) {
 
     $ids = array();
     foreach ($values as $row) {
-      // Use the $id as the key so we don't create more than one value per object.
+      // Use the $nid as the key so we don't create more than one value per node.
       $id = $row->{$this->field_alias};
       $ids[$id] = $id;
     }
     // @TODO Move to CiviCRM API, currently API only returns arrays
     // the render() method of this class and the calander_pluing_style are expecting
-    // an object, hence using DAO.
-    // Sadly neither DAO nor API allows you to load multiple at once eg node_load_multiple()
+    // and object, hence using DAO
     foreach ($ids as $key => $id) {
-      require_once str_replace('_', DIRECTORY_SEPARATOR, $this->definition['dao class']) . '.php';
-      $dao = New $this->definition['dao class']();
+      require_once 'CRM/Event/DAO/Event.php';
+      $dao = New CRM_Event_DAO_Event();
       $dao->id = $id;
       $dao->find();
       $dao->fetch();
       // Make sure no NULL records get through
-      if (!empty($dao->{$this->definition['title field']})) {
-        $this->entities[$dao->id] = $dao;
+      if (!empty($dao->title)) {
+        $this->nodes[$dao->id] = $dao;
       }
       $dao->release();
     }
@@ -95,7 +115,7 @@ class calendar_plugin_row_civicrm extends calendar_plugin_row {
     // Identify the date argument and fields that apply to this view.
     // Preload the Date Views field info for each field, keyed by the
     // field name, so we know how to retrieve field values from the cached node.
-    $data        = date_views_fields($this->base_table);
+    $data        = date_views_fields('civicrm_event');
     $data        = $data['name'];
     $date_fields = array();
     foreach ($this->view->argument as $handler) {
@@ -124,14 +144,17 @@ class calendar_plugin_row_civicrm extends calendar_plugin_row {
   public function render($row) {
     global $base_url;
     $date_info = $this->date_argument->view->date_info;
-    $id = $row->{$this->field_alias};
 
-    if (!is_numeric($id)) {
-      return $rows;
+    $nid = $row->{$this->field_alias};
+    if (!is_numeric($nid)) {
+      return;
     }
 
-    // Load the specified object:
-    $node = (object) $this->entities[$id];
+    // Load the specified node:
+    // We have to clone this or nodes on other views on this page,
+    // like an Upcoming block on the same page as a calendar view,
+    // will end up acquiring the values we set here.
+    $node = clone($this->nodes[$nid]);
     if (empty($node)) {
       return;
     }
@@ -197,10 +220,11 @@ class calendar_plugin_row_civicrm extends calendar_plugin_row {
       // Set the item date to the proper display timezone;
       $item_start_date->setTimezone(new dateTimezone($to_zone));
       $item_end_date->setTimezone(new dateTimezone($to_zone));
-      $event        = new stdClass();
-      $event->nid   = $node->id;
-      $event->title = $node->{$this->definition['title field']};
-      //$event->type = $node->event_type_id;
+
+      $event              = new stdClass();
+      $event->nid         = $node->id;
+      $event->title       = $node->civicrm_event_title;
+      $event->type        = $node->event_type_id;
       $event->date_start  = $item_start_date;
       $event->date_end    = $item_end_date;
       $event->db_tz       = $db_tz;

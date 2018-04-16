@@ -3,7 +3,7 @@
  +--------------------------------------------------------------------+
  | CiviCRM version 4.7                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2017                                |
+ | Copyright CiviCRM LLC (c) 2004-2018                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -23,18 +23,18 @@
  | GNU Affero General Public License or the licensing of CiviCRM,     |
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
-*/
+ */
 
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2017
+ * @copyright CiviCRM LLC (c) 2004-2018
  * $Id$
  *
  */
 
 /**
- * Implements hook_config_info()
+ * Implements hook_config_info().
  */
 function civicrmtheme_config_info() {
   $prefixes['civicrmtheme.settings'] = array(
@@ -86,7 +86,7 @@ function civicrmtheme_list_themes() {
 }
 
 /**
- * Implementation of hook_form_alter().
+ * Implements hook_form_alter().
  */
 function civicrmtheme_form_system_themes_admin_form_alter(&$form, $form_state) {
   $config = config('civicrmtheme.settings');
@@ -134,7 +134,7 @@ function civicrmtheme_system_themes_admin_form_submit($form, &$form_state) {
 }
 
 /**
- * Implementation of hook_custom_theme().
+ * Implements hook_custom_theme().
  */
 function civicrmtheme_custom_theme() {
   if (arg(0) != 'civicrm') {

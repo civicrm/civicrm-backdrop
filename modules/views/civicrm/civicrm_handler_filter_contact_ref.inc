@@ -24,39 +24,41 @@
  */
 
 /**
- * Argument handler for a day (DD)
+ * Filters Contact reference custom field.
  */
-class views_handler_argument_civicrm_day extends views_handler_argument_date {
-
-  /**
-   * Constructor implementation
-   */
+class civicrm_handler_filter_contact_ref extends views_handler_filter_string {
   public function construct() {
     parent::construct();
-    $this->format     = 'j';
-    $this->arg_format = 'd';
-    $this->formula    = views_date_sql_extract('DAY', "***table***.$this->real_field", "datetime", 0);
+    if (!civicrm_initialize()) {
+      return;
+    }
+  }
+  public function op_equal($field) {
+    $this->filterContactRef($field);
+  }
+  public function op_contains($field) {
+    $this->filterContactRef($field);
   }
 
   /**
-   * Provide a link to the next level of the view
+   * Adds where clause to the view query to filter
+   * by contact sort_name instead of id.
+   *
+   * @param string $field
    */
-  public function summary_name($data) {
-    $day = str_pad($data->{$this->name_alias}, 2, '0', STR_PAD_LEFT);
-    return format_date(strtotime("2005" . "05" . $day . " 00:00:00 UTC"), 'custom', $this->format, 'UTC');
-  }
+  public function filterContactRef($field) {
+    if (!empty($this->value)) {
+      $op = $this->operator;
+      if ($this->operator != '=' && $this->operator != '!=') {
+        $op = 'LIKE';
+        $this->value = "%{$this->value}%";
+      }
+      $contacts = db_select('civicrm_contact', 'cc')
+        ->fields('cc', array('id'))
+        ->condition('cc.sort_name', $this->value, $op);
 
-  /**
-   * Provide a link to the next level of the view
-   */
-  public function title() {
-    $day = str_pad($this->argument, 2, '0', STR_PAD_LEFT);
-    return format_date(strtotime("2005" . "05" . $day . " 00:00:00 UTC"), 'custom', $this->format, 'UTC');
-  }
-
-  public function summary_argument($data) {
-    // Make sure the argument contains leading zeroes.
-    return str_pad($data->{$this->base_alias}, 2, '0', STR_PAD_LEFT);
+      $this->query->add_where($this->options['group'], $field, $contacts, 'IN');
+    }
   }
 
 }

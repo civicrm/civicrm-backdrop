@@ -42,9 +42,6 @@
 
 /**
  * Implements hook_user_login().
- *
- * @param $edit
- * @param $account
  */
 function civicrm_user_login(&$edit, $account) {
   if (!civicrm_initialize()) {
@@ -57,8 +54,6 @@ function civicrm_user_login(&$edit, $account) {
 
 /**
  * Implements hook_user_insert().
- *
- * @param $account
  */
 function civicrm_user_insert($account) {
   if (!civicrm_initialize()) {
@@ -83,7 +78,6 @@ function civicrm_user_insert($account) {
 
 /**
  * Implements hook_user_update().
- * @param $account
  */
 function civicrm_user_update($account) {
   if (!civicrm_initialize()) {
@@ -116,7 +110,6 @@ function civicrm_user_update($account) {
 
 /**
  * Implements hook_user_delete().
- * @param $account
  */
 function civicrm_user_delete($account) {
   if (!civicrm_initialize()) {
@@ -131,10 +124,10 @@ function civicrm_user_delete($account) {
  */
 function civicrm_user_profiles() {
   if (!civicrm_initialize()) {
-    return;
+    return array();
   }
 
-  $allUFGroups = CRM_Core_BAO_UFGroup::getModuleUFGroup('User Account', 0, TRUE, CRM_Core_Permission::VIEW, array('id', 'name', 'title', 'is_active' ));
+  $allUFGroups = CRM_Core_BAO_UFGroup::getModuleUFGroup('User Account', 0, TRUE, CRM_Core_Permission::VIEW, array('id', 'name', 'title', 'is_active'));
   $ufGroups = array();
 
   foreach ($allUFGroups as $key => $value) {
@@ -156,9 +149,6 @@ function civicrm_user_profiles() {
  *
  * @todo I suspect that some of the stuff done in the old form_alter handler
  *       should live here instead under D7
- * @param $account
- * @param $view_mode
- * @param $langcode
  */
 function civicrm_user_view($account, $view_mode, $langcode) {
   if (!civicrm_initialize()) {
@@ -236,7 +226,6 @@ function civicrm_user_view($account, $view_mode, $langcode) {
 
 /**
  * Implements hook_user_logout().
- * @param $account
  */
 function civicrm_user_logout($account) {
   if (!civicrm_initialize()) {
