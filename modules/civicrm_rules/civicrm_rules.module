@@ -37,11 +37,11 @@
   * Implements hook_config_info().
   */
 function civicrm_rules_config_info() {
- $prefixes['civicrm_rules.settings'] = array(
-   'label' => t('CiviCRM Rules settings'),
-   'group' => t('CiviCRM'),
- );
- return $prefixes;
+  $prefixes['civicrm_rules.settings'] = array(
+    'label' => t('CiviCRM Rules settings'),
+    'group' => t('CiviCRM'),
+  );
+  return $prefixes;
 }
 
 /**
