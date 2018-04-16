@@ -30,12 +30,12 @@
 
 /**
  * Implements hook_config_info().
-*/
+ */
 function civicrm_group_roles_config_info() {
   $prefixes['civicrm_group_roles.settings'] = array(
     'label' => t('CiviCRM Group Roles settings'),
     'group' => t('CiviCRM'),
-    );
+  );
   return $prefixes;
 }
 
@@ -575,10 +575,10 @@ function civicrm_group_roles_add_rule_form_submit($form, &$form_state) {
 /**
  * Helper function to add and remove users from groups, use after user_save to remove roles $roles = $edit['roles'] for user_save
  *
- * @param array $roles
- *   list of role to add/remove
  * @param object $account
  *   Backdrop user object
+ * @param array $roles
+ *   list of role to add/remove
  * @param string $op
  *   either add or remove
  */
@@ -728,11 +728,11 @@ function civicrm_group_roles_batch_worker($uid, &$context) {
 
   if ($account !== FALSE) {
 
-    $roles = array_diff($account->roles, array( BACKDROP_ANONYMOUS_ROLE, BACKDROP_AUTHENTICATED_ROLE));
+    $roles = array_diff($account->roles, array(BACKDROP_ANONYMOUS_ROLE, BACKDROP_AUTHENTICATED_ROLE));
 
     // Add user to groups
     if ($roles) {
-      civicrm_group_roles_add_remove_groups ($account, $roles, 'add');
+      civicrm_group_roles_add_remove_groups($account, $roles, 'add');
     }
 
     // Add roles to user

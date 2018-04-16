@@ -12,8 +12,9 @@
  * Implements hook_install().
  */
 function civicrm_member_roles_install() {
-  $here = l(t('here'), 'admin/config/civicrm/civicrm_member_roles');
-  backdrop_set_message(t('CiviCRM Member Roles Sync installed. You will need to specify sync rules !1.', array('!1' => $here)));
+  $t = get_t();
+  $here = l($t('here'), 'admin/config/civicrm/civicrm_member_roles');
+  backdrop_set_message($t('CiviCRM Member Roles Sync installed. You will need to specify sync rules !1.', array('!1' => $here)));
 }
 
 /**
