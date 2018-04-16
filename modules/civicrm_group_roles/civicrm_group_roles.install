@@ -21,30 +21,30 @@
  | GNU Affero General Public License or the licensing of CiviCRM,     |
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
-*/
+ */
 
 /* @file
  * A simple module to synchronize Backdrop Roles with Specified CiviCRM Groups
  */
 
 /**
- * Implementation of hook_install().
+ * Implements hook_install().
  */
 function civicrm_group_roles_install() {
-
-  $here = l(t('here'), 'admin/config/civicrm/civicrm_group_roles/add_rule');
-  backdrop_set_message(t('CiviGroup Roles Sync installed. You will need to specify sync rules !1.', array('!1' => $here)));
+  $t = get_t();
+  $here = l($t('here'), 'admin/config/civicrm/civicrm_group_roles/add_rule');
+  backdrop_set_message($t('CiviGroup Roles Sync installed. You will need to specify sync rules !1.', array('!1' => $here)));
 }
 
 /**
- * Implementation of hook_enable().
+ * Implements hook_enable().
  */
 function civicrm_group_roles_enable() {
   db_query("UPDATE {system} SET weight = 110 WHERE name = 'civicrm_group_roles'");
 }
 
 /**
- * Implementation of hook_schema().
+ * Implements hook_schema().
  */
 function civicrm_group_roles_schema() {
   $schema['civicrm_group_roles_rules'] = array(
