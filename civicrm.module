@@ -223,13 +223,8 @@ function civicrm_initialize() {
   }
   _civicrm_registerClassLoader();
 
-<<<<<<< HEAD
   $initialized = &backdrop_static('civicrm_initialize', FALSE);
   $failure = &backdrop_static('civicrm_initialize_failure', FALSE);
-=======
-  $initialized = &drupal_static('civicrm_initialize', FALSE);
-  $failure = &drupal_static('civicrm_initialize_failure', FALSE);
->>>>>>> CRM-20541 - Use drupal_static() instead of static
 
   if ($failure) {
     return FALSE;
