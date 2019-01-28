@@ -60,7 +60,11 @@ function civicrm_user_insert($account) {
     return;
   }
 
-  CRM_Core_BAO_UFMatch::synchronize($account, FALSE, 'Backdrop', civicrm_get_ctype('Individual'));
+  $userSystem = CRM_Core_Config::singleton()->userSystem;
+  $userSystemID = $userSystem->getBestUFID($account);
+  $uniqId = $userSystem->getBestUFUniqueIdentifier($account);
+  CRM_Core_BAO_UFMatch::synchronizeUFMatch($account, $userSystemID, $uniqId, 'Backdrop', NULL, 'Individual', $isLogin = FALSE);
+
   // As per CRM-7858, the email address in CiviCRM isn't always set
   // with a call to synchronize(). So we force this through.
   $contact_id = CRM_Core_BAO_UFMatch::getContactId($account->id());
@@ -68,6 +72,20 @@ function civicrm_user_insert($account) {
     return;
   }
   CRM_Core_BAO_UFMatch::updateContactEmail($contact_id, trim($account->mail));
+
+  // If already in CiviCRM, we don't do then next bit because it will cause
+  // the current request to exit, stopping execution.
+  $config = CRM_Core_Config::singleton();
+  if ($config->inCiviCRM) {
+    return;
+  }
+
+  // Determine if the user is on a CiviCRM generated page or user hook.
+  // If the form have some civicrm unique token then skip.
+  if (!isset($_POST['_qf_default'])) {
+    return;
+  }
+
   // Process any profile form fields that may have been submitted.
   // In particular, this will pick up form fields that were submitted on the user_registration page.
   CRM_Core_BAO_UFGroup::getEditHTML($contact_id, '', 2, TRUE, FALSE, NULL, FALSE, civicrm_get_ctype('Individual'));
