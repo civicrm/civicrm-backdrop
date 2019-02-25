@@ -105,18 +105,19 @@ function civicrm_requirements($phase) {
         );
       }
       break;
-      
+
     case 'runtime':
       if (!civicrm_initialize()) {
         return;
       }
       $vc = new CRM_Utils_VersionCheck();
       $vc->fetch();
-      if ($vc->isInfoAvailable && isset($vc->versionInfo['patch']) && $vc->versionInfo['patch']['severity']=='critical') {
+      if ($vc->isInfoAvailable && isset($vc->versionInfo['patch']) && $vc->versionInfo['patch']['severity'] == 'critical') {
         $severity = REQUIREMENT_ERROR;
         $value = $vc->localVersion . ': ' . $vc->versionInfo['patch']['title'];
         $description = $vc->versionInfo['patch']['message'];
-      } else {
+      }
+      else {
         $severity = REQUIREMENT_OK;
         $value = $vc->localVersion;
         $description = NULL;
