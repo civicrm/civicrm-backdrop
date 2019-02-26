@@ -128,7 +128,8 @@ class civicrm_handler_field_contact_image extends views_handler_field {
       if (!empty($core_filename)) {
         // This is a core contact image.
         $image_uri = 'public://' . $directory . $core_filename;
-      } else {
+      }
+      else {
         // Check if it's a webform image. It could be private or public.
         $filedir = config_get('system.core', 'file_public_path');
         // Try private directory first.
@@ -137,8 +138,9 @@ class civicrm_handler_field_contact_image extends views_handler_field {
         $webform_filename = substr(strstr($value, $privatedir), $skipchars);
         if (!empty($webform_filename)) {
           // Found something in private directory.
-          $image_uri = 'private://' . $webform_filename;          
-        } else {
+          $image_uri = 'private://' . $webform_filename;
+        }
+        else {
           // Try public directory.
           $skipchars = strlen($filedir) + 1;
           $webform_filename = substr(strstr($value, $filedir . '/'), $skipchars);
@@ -147,7 +149,8 @@ class civicrm_handler_field_contact_image extends views_handler_field {
         $image['uri'] = str_replace('\\', '/', $image_uri);
         return theme('image_style', $image);
       }
-    } else {
+    }
+    else {
       // No image styles, use original image.
       $image['width'] = empty($this->options['width']) ? 'auto' : $this->options['width'];
       $image['height'] = empty($this->options['height']) ? 'auto' : $this->options['height'];
@@ -169,7 +172,7 @@ class civicrm_handler_field_contact_image extends views_handler_field {
     $backdrop_upload_path = $wrapper->getDirectoryPath();
     $civi_upload_path = Civi::paths()->getUrl(Civi::settings()->get('customFileUploadDir'));
     $relative_upload_path = explode($backdrop_upload_path, $civi_upload_path);
-    
+
     // If we couldn't explode() then Civi's upload path is not in the public://
     // directory, so we cannot support image styles.
     if (count($relative_upload_path) != 2) {
