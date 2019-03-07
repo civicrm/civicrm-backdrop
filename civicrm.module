@@ -831,7 +831,7 @@ function civicrm_autoload_info() {
     'civicrm_handler_field_encounter_medium' => 'modules/views/civicrm/civicrm_handler_field_encounter_medium.inc',
     'civicrm_handler_field_event' => 'modules/views/civicrm/civicrm_handler_field_event.inc',
     'civicrm_handler_field_event_link' => 'modules/views/civicrm/civicrm_handler_field_event_link.inc',
-    'civicrm_handler_field_custom_file' => 'modules/views/civicrm/civicrm_handler_field_file.inc',
+    'civicrm_handler_field_file' => 'modules/views/civicrm/civicrm_handler_field_file.inc',
     'civicrm_handler_field_im' => 'modules/views/civicrm/civicrm_handler_field_im.inc',
     'civicrm_handler_field_link' => 'modules/views/civicrm/civicrm_handler_field_link.inc',
     'civicrm_handler_field_link_activity' => 'modules/views/civicrm/civicrm_handler_field_link_activity.inc',
