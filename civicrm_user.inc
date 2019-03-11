@@ -42,9 +42,6 @@
 
 /**
  * Implements hook_user_login().
- *
- * @param $edit
- * @param $account
  */
 function civicrm_user_login(&$edit, $account) {
   if (!civicrm_initialize()) {
@@ -57,15 +54,16 @@ function civicrm_user_login(&$edit, $account) {
 
 /**
  * Implements hook_user_insert().
- *
- * @param $account
  */
 function civicrm_user_insert($account) {
   if (!civicrm_initialize()) {
     return;
   }
 
-  CRM_Core_BAO_UFMatch::synchronize($account, FALSE, 'Backdrop', civicrm_get_ctype('Individual'));
+  $userSystem = CRM_Core_Config::singleton()->userSystem;
+  $userSystemID = $userSystem->getBestUFID($account);
+  $uniqId = $userSystem->getBestUFUniqueIdentifier($account);
+  CRM_Core_BAO_UFMatch::synchronizeUFMatch($account, $userSystemID, $uniqId, 'Backdrop', NULL, 'Individual', $isLogin = FALSE);
 
   // As per CRM-7858, the email address in CiviCRM isn't always set
   // with a call to synchronize(). So we force this through.
@@ -75,6 +73,19 @@ function civicrm_user_insert($account) {
   }
   CRM_Core_BAO_UFMatch::updateContactEmail($contact_id, trim($account->mail));
 
+  // If already in CiviCRM, we don't do then next bit because it will cause
+  // the current request to exit, stopping execution.
+  $config = CRM_Core_Config::singleton();
+  if ($config->inCiviCRM) {
+    return;
+  }
+
+  // Determine if the user is on a CiviCRM generated page or user hook.
+  // If the form have some civicrm unique token then skip.
+  if (!isset($_POST['_qf_default'])) {
+    return;
+  }
+
   // Process any profile form fields that may have been submitted.
   // In particular, this will pick up form fields that were submitted on the user_registration page.
   CRM_Core_BAO_UFGroup::getEditHTML($contact_id, '', 2, TRUE, FALSE, NULL, FALSE, civicrm_get_ctype('Individual'));
@@ -83,7 +94,6 @@ function civicrm_user_insert($account) {
 
 /**
  * Implements hook_user_update().
- * @param $account
  */
 function civicrm_user_update($account) {
   if (!civicrm_initialize()) {
@@ -116,7 +126,6 @@ function civicrm_user_update($account) {
 
 /**
  * Implements hook_user_delete().
- * @param $account
  */
 function civicrm_user_delete($account) {
   if (!civicrm_initialize()) {
@@ -131,10 +140,10 @@ function civicrm_user_delete($account) {
  */
 function civicrm_user_profiles() {
   if (!civicrm_initialize()) {
-    return;
+    return array();
   }
 
-  $allUFGroups = CRM_Core_BAO_UFGroup::getModuleUFGroup('User Account', 0, TRUE, CRM_Core_Permission::VIEW, array('id', 'name', 'title', 'is_active' ));
+  $allUFGroups = CRM_Core_BAO_UFGroup::getModuleUFGroup('User Account', 0, TRUE, CRM_Core_Permission::VIEW, array('id', 'name', 'title', 'is_active'));
   $ufGroups = array();
 
   foreach ($allUFGroups as $key => $value) {
@@ -156,9 +165,6 @@ function civicrm_user_profiles() {
  *
  * @todo I suspect that some of the stuff done in the old form_alter handler
  *       should live here instead under D7
- * @param $account
- * @param $view_mode
- * @param $langcode
  */
 function civicrm_user_view($account, $view_mode, $langcode) {
   if (!civicrm_initialize()) {
@@ -236,7 +242,6 @@ function civicrm_user_view($account, $view_mode, $langcode) {
 
 /**
  * Implements hook_user_logout().
- * @param $account
  */
 function civicrm_user_logout($account) {
   if (!civicrm_initialize()) {

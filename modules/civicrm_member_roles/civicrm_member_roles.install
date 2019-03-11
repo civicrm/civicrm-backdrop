@@ -8,24 +8,24 @@
  * Install CiviMember Role Sync database table and provide hook_uninstall.
  */
 
- /**
-  * Implementation of hook_install().
-  */
- function civicrm_member_roles_install() {
+/**
+ * Implements hook_install().
+ */
+function civicrm_member_roles_install() {
+  $t = get_t();
+  $here = l($t('here'), 'admin/config/civicrm/civicrm_member_roles');
+  backdrop_set_message($t('CiviCRM Member Roles Sync installed. You will need to specify sync rules !1.', array('!1' => $here)));
+}
 
-   $here = l(t('here'), 'admin/config/civicrm/civicrm_member_roles');
-   backdrop_set_message(t('CiviCRM Member Roles Sync installed. You will need to specify sync rules !1.', array('!1' => $here)));
- }
-
-/*
- * Implemenation of hook_enable()
+/**
+ * Implements hook_enable().
  */
 function civicrm_member_roles_enable() {
   db_query("UPDATE {system} SET weight = 110 WHERE name = 'civicrm_member_roles'");
 }
 
 /**
- * Implementation of hook_schema().
+ * Implements hook_schema().
  */
 function civicrm_member_roles_schema() {
   $schema['civicrm_member_roles_rules'] = array(
@@ -98,12 +98,15 @@ function civicrm_member_roles_update_1002() {
       case '0':
         $config->set('civicrm_member_roles_sync_method', array('login'));
         break;
+
       case '1':
         $config->set('civicrm_member_roles_sync_method', array('cron'));
         break;
+
       case '2':
         $config->set('civicrm_member_roles_sync_method', array());
         break;
+
       case '3':
         $config->set('civicrm_member_roles_sync_method', array('update'));
         break;
