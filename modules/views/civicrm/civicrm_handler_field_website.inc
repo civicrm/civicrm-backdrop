@@ -30,7 +30,7 @@
  */
 class civicrm_handler_field_website extends civicrm_handler_field {
 
-  static $_websiteType;
+  public static $_websiteType;
 
   public function construct() {
     parent::construct();
