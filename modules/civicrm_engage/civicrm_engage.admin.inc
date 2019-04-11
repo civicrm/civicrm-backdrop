@@ -1,6 +1,5 @@
 <?php
 
-
 function civicrm_engage_admin_settings($form, $form_state) {
   $config = config('civicrm_engage.settings');
   $form['#config'] = 'civicrm_engage.settings';
@@ -129,7 +128,6 @@ function civicrm_engage_admin_load_data($form_state = NULL) {
   );
   return $form;
 }
-
 
 function civicrm_engage_admin_load_data_submit($form, &$form_state) {
   if ($form_state['values']['contact_subtypes'] == 1) {
