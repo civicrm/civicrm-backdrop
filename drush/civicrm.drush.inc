@@ -298,7 +298,6 @@ function drush_civicrm_install_validate() {
   return TRUE;
 }
 
-
 /**
  * Implementation of command 'civicrm-install'
  */
@@ -707,7 +706,8 @@ function drush_civicrm_upgrade_db() {
 
     // new since CiviCRM 4.1
     if (is_callable(array(
-      $upgrade, 'setPrint'))) {
+      $upgrade, 'setPrint',
+    ))) {
       $upgrade->setPrint(TRUE);
     }
 
@@ -727,7 +727,6 @@ function drush_civicrm_upgrade_db() {
 function drush_civicrm_update_cfg_validate() {
   return _civicrm_init();
 }
-
 
 /**
  * Implementation of command 'civicrm-update-cfg'
