@@ -1039,12 +1039,37 @@ function civicrm_theme_registry_alter(&$theme_registry) {
  * This hook is intended for page modification, here we are using it to add a header.
  */
 function civicrm_preprocess_page(&$variables) {
+<<<<<<< HEAD
   global $civicrm_root;
   if (empty($civicrm_root)) {
     return;
   }
   if ($region = CRM_Core_Region::instance('html-header', FALSE)) {
     CRM_Utils_System::addHTMLHead($region->render(''));
+  }
+  // to increase it's flexibility.
+  if (module_exists('date_popup') && (in_array(arg(0), array('civicrm', 'user')))) {
+
+    /**
+     * Have hidden this function as it is not needed,
+     * but left as an example when we need to unset js
+     * in the future...
+     *
+     * // Only do this for pages that have JavaScript on them.
+     *  if (!empty($variables['scripts'])) {
+     *    $path = drupal_get_path('module', 'date_popup');
+     *    unset($scripts['module'][$path . '/lib/ui.datepicker.js']);
+     *    $variables['scripts'] = drupal_get_js('header', $scripts);
+     *  }
+     */
+
+    // Similar process for CSS but there are 2 CSS related variables.
+    // $variables['css'] and $variables['styles'] are both used.
+    if (!empty($variables['css'])) {
+      $path = drupal_get_path('module', 'date_popup');
+      unset($variables['css']['all']['module'][$path . '/themes/datepicker.css']);
+      $variables['styles'] = drupal_get_css($variables['css']);
+    }
   }
 }
 
