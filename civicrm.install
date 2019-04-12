@@ -134,7 +134,6 @@ function civicrm_requirements($phase) {
   return $requirements;
 }
 
-
 /**
  * Implements hook_update_last_removed().
  */
