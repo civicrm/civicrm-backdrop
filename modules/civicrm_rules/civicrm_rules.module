@@ -196,6 +196,7 @@ FROM   civicrm_mailing
     }
   }
 }
+
 /**
  * Implements hook_permission().
  */
