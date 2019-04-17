@@ -262,11 +262,11 @@ function civicrm_member_roles_configure() {
     ),
   );
   $form['settings']['civicrm_member_roles_cron_limit'] = array(
-    '#type' => 'textfield',
+    '#type' => 'number',
     '#title' => t('Memberships Synchronized on Cron'),
     '#description' => t('Enter how many Memberships and Roles you would like to synchronize per cron run. Synchronization will be performed randomly. This prevents the operation from timing out when too many items are processed at once. If this is empty, all Memberships and Roles will be processed.'),
     '#default_value' => config_get('civicrm_member_roles.settings', 'civicrm_member_roles_cron_limit'),
-    '#element_validate' => array('element_validate_integer_positive'),
+    '#min' => 0,
     '#size' => 15,
     '#maxlength' => 4,
   );
