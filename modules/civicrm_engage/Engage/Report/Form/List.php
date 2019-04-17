@@ -29,7 +29,6 @@
  *
  * @package CRM
  * @copyright CiviCRM LLC (c) 2004-2019
- * @copyright DharmaTech  (c) 2009
  * $Id$
  *
  */

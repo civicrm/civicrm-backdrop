@@ -29,7 +29,8 @@
  * @ingroup civicrm_field_handlers
  */
 class civicrm_handler_field_activity extends civicrm_handler_field {
-  public static $_recordType;
+
+  static $_recordType;
 
   public function construct() {
     parent::construct();

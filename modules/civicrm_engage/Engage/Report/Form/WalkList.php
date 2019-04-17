@@ -40,7 +40,6 @@ require_once 'Engage/Report/Form/List.php';
  *  Generate a walk list
  */
 class Engage_Report_Form_WalkList extends Engage_Report_Form_List {
-
   public function __construct() {
 
     parent::__construct();

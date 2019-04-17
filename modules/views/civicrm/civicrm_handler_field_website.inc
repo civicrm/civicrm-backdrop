@@ -29,7 +29,8 @@
  * @ingroup civicrm_field_handlers
  */
 class civicrm_handler_field_website extends civicrm_handler_field {
-  public static $_websiteType;
+
+  static $_websiteType;
 
   public function construct() {
     parent::construct();
