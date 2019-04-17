@@ -879,6 +879,7 @@ function civicrm_autoload_info() {
     'civicrm_handler_relationship_phone' => 'modules/views/civicrm/civicrm_handler_relationship_phone.inc',
     'civicrm_handler_relationship_relationship' => 'modules/views/civicrm/civicrm_handler_relationship_relationship.inc',
     'civicrm_handler_relationship_website' => 'modules/views/civicrm/civicrm_handler_relationship_website.inc',
+    'civicrm_handler_relationship_participant' => 'modules/views/civicrm/civicrm_handler_relationship_participant.inc',
 
     // sort handlers
     'civicrm_handler_sort_address_pseudoconstant' => 'modules/views/civicrm/civicrm_handler_sort_address_pseudoconstant.inc',

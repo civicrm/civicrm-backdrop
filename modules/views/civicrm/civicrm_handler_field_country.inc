@@ -32,8 +32,9 @@
  *
  */
 class civicrm_handler_field_country extends civicrm_handler_field_address {
-  public static $_countries;
-  public static $_countries_full;
+
+  static $_countries;
+  static $_countries_full;
 
   public function construct() {
     parent::construct();

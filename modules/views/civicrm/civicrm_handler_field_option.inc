@@ -29,7 +29,8 @@
  * @ingroup civicrm_field_handlers
  */
 class civicrm_handler_field_option extends civicrm_handler_field {
-  public static $_options;
+
+  static $_options;
 
   public function render($values) {
     $this->initialize();
