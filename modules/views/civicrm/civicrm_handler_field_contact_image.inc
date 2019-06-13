@@ -146,9 +146,9 @@ class civicrm_handler_field_contact_image extends views_handler_field {
           $webform_filename = substr(strstr($value, $filedir . '/'), $skipchars);
           $image_uri = 'public://' . $webform_filename;
         }
-        $image['uri'] = str_replace('\\', '/', $image_uri);
-        return theme('image_style', $image);
       }
+      $image['uri'] = str_replace('\\', '/', $image_uri);
+      return theme('image_style', $image);
     }
     else {
       // No image styles, use original image.
