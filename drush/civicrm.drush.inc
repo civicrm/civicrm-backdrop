@@ -342,6 +342,8 @@ function drush_civicrm_install() {
 
   module_enable(array('civicrm'));
 
+  _civicrm_install_set_backdrop_perms();
+  
   drush_log(dt("CiviCRM installed."), 'ok');
 }
 
@@ -425,6 +427,41 @@ function _civicrm_create_files_dirs($civicrmInstallerHelper, $modPath) {
 
   return TRUE;
 }
+
+/**
+ * Sets default permissions for backdrop users
+ * when installing civicrm
+ */
+ 
+function _civicrm_install_set_backdrop_perms() {
+  $perms = array(
+    'access all custom data',
+    'access uploaded files',
+    'make online contributions',
+    'profile create',
+    'profile edit',
+    'profile view',
+    'register for events',
+    'view event info',
+    'view event participants',
+    'access CiviMail subscribe/unsubscribe pages',
+  );
+  // Adding a permission that has not yet been assigned to a module by
+  // a hook_permission implementation results in a database error.
+  // CRM-9042
+  $allPerms = array_keys(module_invoke_all('permission'));
+  foreach (array_diff($perms, $allPerms) as $perm) {
+    watchdog('civicrm',
+      'Cannot grant the %perm permission because it does not yet exist.',
+      array('%perm' => $perm),
+      WATCHDOG_ERROR
+    );
+  }
+  $perms = array_intersect($perms, $allPerms);
+  user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, $perms);
+  user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, $perms);
+}
+
 
 /**
  * Generates civicrm.settings.php file
