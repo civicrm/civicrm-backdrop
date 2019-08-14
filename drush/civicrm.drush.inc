@@ -340,7 +340,7 @@ function drush_civicrm_install() {
   // generate civicrm.settings.php file
   _civicrm_generate_settings_file($dbuser, $dbpass, $dbhost, $dbname, $modPath);
 
-  module_enable(array('civicrm'));
+  module_enable(array('civicrm', 'civicrmtheme'));
 
   drush_log(dt("CiviCRM installed."), 'ok');
 }
