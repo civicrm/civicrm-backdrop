@@ -384,28 +384,29 @@ function _civicrm_install_db($dbuser, $dbpass, $dbhost, $dbname,
   drush_log(dt("Loading CiviCRM database with required data .."));
 
   if ($loadGeneratedData) {
-    drush_log(dt("Loading in generated data"));
+    drush_log(dt("Loading in generated data .."));
     civicrm_source($dsn, $sqlPath . DIRECTORY_SEPARATOR . 'civicrm_generated.mysql', TRUE);
-  }else{
+  }
+  else {
     // testing the translated sql files availability
     $data_file = $sqlPath . '/civicrm_data.mysql';
     $acl_file = $sqlPath . '/civicrm_acl.mysql';
     if ($lang != '') {
-        if (file_exists($sqlPath . '/civicrm_data.' . $lang . '.mysql')
-            and file_exists($sqlPath . '/civicrm_acl.' . $lang . '.mysql')
-            and $lang != ''
-        ) {
-            $data_file = $sqlPath . '/civicrm_data.' . $lang . '.mysql';
-            $acl_file = $sqlPath . '/civicrm_acl.' . $lang . '.mysql';
-        }
-        else {
-            drush_log(dt("No sql files could be retrieved for \"" . $lang .
-                         "\", using default language."
-            ), 'warning');
-        }
+      if (file_exists($sqlPath . '/civicrm_data.' . $lang . '.mysql')
+        and file_exists($sqlPath . '/civicrm_acl.' . $lang . '.mysql')
+        and $lang != ''
+      ) {
+        $data_file = $sqlPath . '/civicrm_data.' . $lang . '.mysql';
+        $acl_file = $sqlPath . '/civicrm_acl.' . $lang . '.mysql';
+      }
+      else {
+        drush_log(dt("No sql files could be retrieved for \"" . $lang .
+                      "\", using default language."
+        ), 'warning');
+      }
     }
-      civicrm_source($dsn, $data_file);
-      civicrm_source($dsn, $acl_file);
+    civicrm_source($dsn, $data_file);
+    civicrm_source($dsn, $acl_file);
   }
   drush_log(dt("CiviCRM database loaded successfully."), 'ok');
 }
