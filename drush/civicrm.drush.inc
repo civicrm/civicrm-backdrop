@@ -311,7 +311,7 @@ function drush_civicrm_install() {
   $backdropRoot = drush_get_context('DRUSH_BACKDROP_ROOT');
   $modPath = "$backdropRoot/$crmpath";
   $lang = drush_get_option('lang', '');
-  $loadGeneratedData = drush_get_option('load_generated_data', FALSE);
+  $loadGeneratedData = filter_var(drush_get_option('load_generated_data', FALSE), FILTER_VALIDATE_BOOLEAN);
 
   if (!is_dir("$modPath/civicrm")) {
     // extract tarfile at right place
