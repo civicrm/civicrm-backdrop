@@ -86,6 +86,7 @@ function civicrm_drush_command() {
       'site_url' => 'Base Url for your backdrop/CiviCRM website without http (e.g. mysite.com)',
       'ssl' => 'Using ssl for your backdrop/CiviCRM website if set to on (e.g. --ssl=on)',
       'load_generated_data' => 'Loads the demo generated data. Defaults to FALSE.',
+      'site_key' => 'Define a site key, suggest md5 hash. Otional, install will generate if not present',
     ),
     'aliases' => array('cvi'),
   );
@@ -512,6 +513,10 @@ function _civicrm_generate_settings_file($dbuser, $dbpass, $dbhost, $dbname, $mo
     $cms = $v['cms'];
   }
 
+  if (!$sitekey = drush_get_option('site_key', FALSE)) {
+      $sitekey = md5(uniqid('', TRUE) . $baseUrl);
+  }
+      
   $params = array(
     'crmRoot' => $crmPath,
     'templateCompileDir' => "$backdropRoot/$siteRoot/files/civicrm/templates_c",
@@ -526,7 +531,7 @@ function _civicrm_generate_settings_file($dbuser, $dbpass, $dbhost, $dbname, $mo
     'CMSdbPass' => $db_spec['password'],
     'CMSdbHost' => $db_spec['host'],
     'CMSdbName' => $db_spec['database'],
-    'siteKey' => md5(uniqid('', TRUE) . $baseUrl),
+    'siteKey' => $sitekey,
   );
   $str = file_get_contents($settingsTplFile);
   foreach ($params as $key => $value) {
