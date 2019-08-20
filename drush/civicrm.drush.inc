@@ -343,7 +343,7 @@ function drush_civicrm_install() {
   module_enable(array('civicrm', 'civicrmtheme'));
 
   _civicrm_install_set_backdrop_perms();
-  
+
   drush_log(dt("CiviCRM installed."), 'ok');
 }
 
@@ -435,7 +435,6 @@ function _civicrm_create_files_dirs($civicrmInstallerHelper, $modPath) {
  * Sets default permissions for backdrop users
  * when installing civicrm
  */
- 
 function _civicrm_install_set_backdrop_perms() {
   $perms = array(
     'access all custom data',
@@ -464,7 +463,6 @@ function _civicrm_install_set_backdrop_perms() {
   user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, $perms);
   user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, $perms);
 }
-
 
 /**
  * Generates civicrm.settings.php file
