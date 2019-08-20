@@ -1039,7 +1039,6 @@ function civicrm_theme_registry_alter(&$theme_registry) {
  * This hook is intended for page modification, here we are using it to add a header.
  */
 function civicrm_preprocess_page(&$variables) {
-<<<<<<< HEAD
   global $civicrm_root;
   if (empty($civicrm_root)) {
     return;
