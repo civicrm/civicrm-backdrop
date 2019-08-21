@@ -511,9 +511,9 @@ function _civicrm_generate_settings_file($dbuser, $dbpass, $dbhost, $dbname, $mo
     require_once "$crmPath/civicrm-version.php";
     $v = civicrmVersion();
     $cms = $v['cms'];
-  }
+  } 
   if (!$sitekey = drush_get_option('site_key', FALSE)) {
-      $sitekey = md5(rand() . mt_rand() . rand() . uniqid('', TRUE) . $baseUrl);
+    $sitekey = md5(rand() . mt_rand() . rand() . uniqid('', TRUE) . $baseUrl);
   }
   $params = array(
     'crmRoot' => $crmPath,
