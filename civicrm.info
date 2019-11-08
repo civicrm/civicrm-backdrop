@@ -6,3 +6,5 @@ backdrop = 1.x
 project = civicrm
 php = 5.6
 type = module
+
+stylesheets[all][] = civicrm_backdrop.css
