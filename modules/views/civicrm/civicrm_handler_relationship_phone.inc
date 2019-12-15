@@ -30,7 +30,7 @@
  */
 class civicrm_handler_relationship_phone extends civicrm_handler_relationship_location {
 
-  public static $_phoneType;
+  static $_phoneType;
 
   public function construct() {
     parent::construct();

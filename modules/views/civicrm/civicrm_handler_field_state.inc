@@ -29,8 +29,9 @@
  * @ingroup civicrm_field_handlers
  */
 class civicrm_handler_field_state extends civicrm_handler_field_address {
-  public static $_states;
-  public static $_states_full;
+
+  static $_states;
+  static $_states_full;
 
   public function construct() {
     parent::construct();
