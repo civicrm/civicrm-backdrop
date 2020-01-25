@@ -825,7 +825,7 @@ function civicrm_admin_bar_output_alter(&$content) {
 function civicrm_autoload_info() {
   return array(
 
-    // field handlers
+    // field handlers.
     'civicrm_handler_field' => 'modules/views/civicrm/civicrm_handler_field.inc',
     'civicrm_handler_field_activity' => 'modules/views/civicrm/civicrm_handler_field_activity.inc',
     'civicrm_handler_field_address' => 'modules/views/civicrm/civicrm_handler_field_address.inc',
