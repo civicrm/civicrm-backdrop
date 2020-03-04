@@ -125,11 +125,34 @@ class civicrm_handler_field_contact_image extends views_handler_field {
     $directory = $this->get_civi_relative_upload_path();
     if ($this->options['image_style'] && module_exists('image') && $directory !== FALSE) {
       $image['style_name'] = empty($this->options['image_style']) ? '' : $this->options['image_style'];
-      $image_path = $directory . substr(strstr($value, 'photo='), 6);
-      $image['path'] = str_replace('\\', '/', $image_path);
+      $core_filename = substr(strstr($value, 'photo='), 6);
+      if (!empty($core_filename)) {
+        // This is a core contact image.
+        $image_uri = 'public://' . $directory . $core_filename;
+      }
+      else {
+        // Check if it's a webform image. It could be private or public.
+        $filedir = config_get('system.core', 'file_public_path');
+        // Try private directory first.
+        $privatedir = 'system/' . $filedir;
+        $skipchars = strlen($privatedir) + 1;
+        $webform_filename = substr(strstr($value, $privatedir), $skipchars);
+        if (!empty($webform_filename)) {
+          // Found something in private directory.
+          $image_uri = 'private://' . $webform_filename;
+        }
+        else {
+          // Try public directory.
+          $skipchars = strlen($filedir) + 1;
+          $webform_filename = substr(strstr($value, $filedir . '/'), $skipchars);
+          $image_uri = 'public://' . $webform_filename;
+        }
+      }
+      $image['uri'] = str_replace('\\', '/', $image_uri);
       return theme('image_style', $image);
     }
     else {
+      // No image styles, use original image.
       $image['width'] = empty($this->options['width']) ? 'auto' : $this->options['width'];
       $image['height'] = empty($this->options['height']) ? 'auto' : $this->options['height'];
       return theme('image', $image);
