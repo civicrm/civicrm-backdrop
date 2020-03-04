@@ -157,6 +157,17 @@ function _civicrm_core_data(&$data, $enabled) {
     ),
   );
 
+  $data['civicrm_event']['civicrm_participant'] = array(
+    'real field' => 'id',
+    'title' => t('CiviCRM Participant'),
+    'help' => t('Allows a Participant Contact relationship from an Event'),
+    'relationship' => array(
+      'base' => 'civicrm_participant',
+      'base field' => 'event_id',
+      'handler' => 'civicrm_handler_relationship_participant',
+      'label' => t('CiviCRM Participant'),
+    ),
+  );
   // Backdrop ID of the contact (from uf_match.uf_id)
   $data['civicrm_contact']['backdrop_id'] = array(
     'real field' => 'id',
@@ -697,6 +708,22 @@ function _civicrm_core_data(&$data, $enabled) {
   $data['civicrm_contact']['modified_date'] = array(
     'title' => t('Modified date'),
     'help' => t("The date the contact's record was last modified."),
+    'field' => array(
+      'handler' => 'civicrm_handler_field_datetime',
+      'click sortable' => TRUE,
+    ),
+    'filter' => array(
+      'handler' => 'civicrm_handler_filter_datetime',
+      'is date' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'civicrm_handler_sort_date',
+    ),
+  );
+  // Created date
+  $data['civicrm_contact']['created_date'] = array(
+    'title' => t('Created date'),
+    'help' => t("The date the contact's record was created."),
     'field' => array(
       'handler' => 'civicrm_handler_field_datetime',
       'click sortable' => TRUE,
@@ -1956,7 +1983,8 @@ function _civicrm_core_data(&$data, $enabled) {
       'click sortable' => TRUE,
       'pseudo class' => 'CRM_Core_PseudoConstant',
       'pseudo method' => 'activityType',
-      'pseudo args' => array(TRUE, TRUE), // Include cases (if CiviCase is enabled)
+      // Include cases (if CiviCase is enabled)
+      'pseudo args' => array(TRUE, TRUE),
     ),
     'argument' => array(
       'handler' => 'views_handler_argument',

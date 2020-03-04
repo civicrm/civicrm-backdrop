@@ -31,6 +31,7 @@
 class civicrm_handler_filter_group_status extends views_handler_filter_in_operator {
 
   static $groupContactStatus = NULL;
+
   public function construct() {
     parent::construct();
 

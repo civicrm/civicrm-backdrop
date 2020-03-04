@@ -1,34 +1,18 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 5                                                  |
- +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2019                                |
- +--------------------------------------------------------------------+
- | This file is a part of CiviCRM.                                    |
+ | Copyright CiviCRM LLC. All rights reserved.                        |
  |                                                                    |
- | CiviCRM is free software; you can copy, modify, and distribute it  |
- | under the terms of the GNU Affero General Public License           |
- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
- |                                                                    |
- | CiviCRM is distributed in the hope that it will be useful, but     |
- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
- | See the GNU Affero General Public License for more details.        |
- |                                                                    |
- | You should have received a copy of the GNU Affero General Public   |
- | License and the CiviCRM Licensing Exception along                  |
- | with this program; if not, contact CiviCRM LLC                     |
- | at info[AT]civicrm[DOT]org. If you have questions about the        |
- | GNU Affero General Public License or the licensing of CiviCRM,     |
- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+ | This work is published under the GNU AGPLv3 license with some      |
+ | permitted exceptions and without any warranty. For full license    |
+ | and copyright information, see https://civicrm.org/licensing       |
  +--------------------------------------------------------------------+
  */
 
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2019
+ * @copyright CiviCRM LLC https://civicrm.org/licensing
  */
 
 /**
@@ -181,7 +165,7 @@ function civicrm_drush_command() {
     // explicit callback declaration and non-standard name to avoid collision with "sql-conf"
     'callback' => 'drush_civicrm_sqlconf',
     'description' => 'Print CiviCRM database connection details.',
-    'bootstrap' => DRUSH_BOOTSTRAP_BACKDROP_CONFIGURATION,
+    'bootstrap' => BACKDROP_BOOTSTRAP_CONFIGURATION,
   );
   $items['civicrm-sql-connect'] = array(
     // explicit callback declaration and non-standard name to avoid collision with "sql-connect"
@@ -224,7 +208,7 @@ function civicrm_drush_command() {
     'callback' => 'drush_civicrm_sqlcli',
     'description' => "Open a SQL command-line interface using CiviCRM's credentials.",
     'aliases' => array('cvsqlc'),
-    'bootstrap' => DRUSH_BOOTSTRAP_BACKDROP_CONFIGURATION,
+    'bootstrap' => BACKDROP_BOOTSTRAP_CONFIGURATION,
   );
   $items['civicrm-sql-rebuild-triggers'] = array(
     'description' => 'Rebuild SQL triggers',
@@ -298,7 +282,6 @@ function drush_civicrm_install_validate() {
   return TRUE;
 }
 
-
 /**
  * Implementation of command 'civicrm-install'
  */
@@ -341,7 +324,9 @@ function drush_civicrm_install() {
   // generate civicrm.settings.php file
   _civicrm_generate_settings_file($dbuser, $dbpass, $dbhost, $dbname, $modPath);
 
-  module_enable(array('civicrm'));
+  module_enable(array('civicrm', 'civicrmtheme'));
+
+  _civicrm_install_set_backdrop_perms();
 
   drush_log(dt("CiviCRM installed."), 'ok');
 }
@@ -383,28 +368,31 @@ function _civicrm_install_db($dbuser, $dbpass, $dbhost, $dbname,
   drush_log(dt("Loading CiviCRM database structure .."));
   civicrm_source($dsn, $sqlPath . '/civicrm.mysql');
   drush_log(dt("Loading CiviCRM database with required data .."));
-  // testing the translated sql files availability
-  $data_file = $sqlPath . '/civicrm_data.mysql';
-  $acl_file = $sqlPath . '/civicrm_acl.mysql';
-  if ($lang != '') {
-    if (file_exists($sqlPath . '/civicrm_data.' . $lang . '.mysql')
-      and file_exists($sqlPath . '/civicrm_acl.' . $lang . '.mysql')
-      and $lang != ''
-    ) {
-      $data_file = $sqlPath . '/civicrm_data.' . $lang . '.mysql';
-      $acl_file = $sqlPath . '/civicrm_acl.' . $lang . '.mysql';
-    }
-    else {
-      drush_log(dt("No sql files could be retrieved for \"" . $lang .
-        "\", using default language."
-      ), 'warning');
-    }
-  }
-  civicrm_source($dsn, $data_file);
-  civicrm_source($dsn, $acl_file);
 
   if ($loadGeneratedData) {
+    drush_log(dt("Loading in generated data .."));
     civicrm_source($dsn, $sqlPath . DIRECTORY_SEPARATOR . 'civicrm_generated.mysql', TRUE);
+  }
+  else {
+    // testing the translated sql files availability
+    $data_file = $sqlPath . '/civicrm_data.mysql';
+    $acl_file = $sqlPath . '/civicrm_acl.mysql';
+    if ($lang != '') {
+      if (file_exists($sqlPath . '/civicrm_data.' . $lang . '.mysql')
+        and file_exists($sqlPath . '/civicrm_acl.' . $lang . '.mysql')
+        and $lang != ''
+      ) {
+        $data_file = $sqlPath . '/civicrm_data.' . $lang . '.mysql';
+        $acl_file = $sqlPath . '/civicrm_acl.' . $lang . '.mysql';
+      }
+      else {
+        drush_log(dt("No sql files could be retrieved for \"" . $lang .
+                      "\", using default language."
+        ), 'warning');
+      }
+    }
+    civicrm_source($dsn, $data_file);
+    civicrm_source($dsn, $acl_file);
   }
   drush_log(dt("CiviCRM database loaded successfully."), 'ok');
 }
@@ -425,6 +413,39 @@ function _civicrm_create_files_dirs($civicrmInstallerHelper, $modPath) {
   @drush_op('chmod', "$backdropRoot/$siteRoot/files/civicrm", 0777);
 
   return TRUE;
+}
+
+/**
+ * Sets default permissions for backdrop users
+ * when installing civicrm
+ */
+function _civicrm_install_set_backdrop_perms() {
+  $perms = array(
+    'access all custom data',
+    'access uploaded files',
+    'make online contributions',
+    'profile create',
+    'profile edit',
+    'profile view',
+    'register for events',
+    'view event info',
+    'view event participants',
+    'access CiviMail subscribe/unsubscribe pages',
+  );
+  // Adding a permission that has not yet been assigned to a module by
+  // a hook_permission implementation results in a database error.
+  // CRM-9042
+  $allPerms = array_keys(module_invoke_all('permission'));
+  foreach (array_diff($perms, $allPerms) as $perm) {
+    watchdog('civicrm',
+      'Cannot grant the %perm permission because it does not yet exist.',
+      array('%perm' => $perm),
+      WATCHDOG_ERROR
+    );
+  }
+  $perms = array_intersect($perms, $allPerms);
+  user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, $perms);
+  user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, $perms);
 }
 
 /**
@@ -707,7 +728,8 @@ function drush_civicrm_upgrade_db() {
 
     // new since CiviCRM 4.1
     if (is_callable(array(
-      $upgrade, 'setPrint'))) {
+      $upgrade, 'setPrint',
+    ))) {
       $upgrade->setPrint(TRUE);
     }
 
@@ -727,7 +749,6 @@ function drush_civicrm_upgrade_db() {
 function drush_civicrm_update_cfg_validate() {
   return _civicrm_init();
 }
-
 
 /**
  * Implementation of command 'civicrm-update-cfg'
@@ -1403,6 +1424,13 @@ function _civicrm_init($fail = TRUE, $load_config = TRUE) {
   // return if already initialized
   if ($init) {
     return $init;
+  }
+
+  if (!version_compare(phpversion(), CIVICRM_DRUPAL_PHP_MINIMUM, '>=')) {
+    return drush_set_error('CIVICRM_PHP_MINIMUM', dt('CiviCRM requires PHP @required+. Drush is running PHP @current.', [
+      '@current' => phpversion(),
+      '@required' => CIVICRM_DRUPAL_PHP_MINIMUM,
+    ]));
   }
 
   global $cmsPath;

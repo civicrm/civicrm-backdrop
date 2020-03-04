@@ -548,11 +548,13 @@ function civicrm_group_roles_add_rule_form_submit($form, &$form_state) {
   }
   //If edit_flag is set then process as an edit form, if not then process as an add form.
   if (isset($form_state['values']['edit_flag'])) {
-
-    $edit_rule = db_update('civicrm_group_roles_rules')->fields(array(
-                   'role_name' => $form_state['values']['add_rule']['select_role'],
-                   'group_id' => (int) $form_state['values']['add_rule']['select_group'],
-                 ))->condition('id', (int) $form_state['values']['edit_flag'])->execute();
+    $edit_rule = db_update('civicrm_group_roles_rules')
+      ->fields(array(
+        'role_name' => $form_state['values']['add_rule']['select_role'],
+        'group_id' => (int) $form_state['values']['add_rule']['select_group'],
+      ))
+      ->condition('id', (int) $form_state['values']['edit_flag'])
+      ->execute();
 
     if ($edit_rule) {
       backdrop_set_message(t('Your association rule has been edited.'));
@@ -560,9 +562,9 @@ function civicrm_group_roles_add_rule_form_submit($form, &$form_state) {
   }
   else {
     $add_rule = db_insert('civicrm_group_roles_rules')->fields(array(
-                  'role_name' => $form_state['values']['add_rule']['select_role'],
-                  'group_id' => (int) $form_state['values']['add_rule']['select_group'],
-                ))->execute();
+      'role_name' => $form_state['values']['add_rule']['select_role'],
+      'group_id' => (int) $form_state['values']['add_rule']['select_group'],
+    ))->execute();
 
     if ($add_rule) {
       backdrop_set_message(t('Your association rule has been added.'));
@@ -645,7 +647,8 @@ function civicrm_group_roles_add_remove_groups($account, $roles, $op) {
         } //end foreach
       } //end foreach
 
-    } //end if contact_id
+    }
+    //end if contact_id
 
     else {
       watchdog('civicrm_group_roles', 'CiviCRM contact not found for Backdrop user ID @id', array('@id' => $user->uid), WATCHDOG_ERROR);
@@ -656,7 +659,6 @@ function civicrm_group_roles_add_remove_groups($account, $roles, $op) {
 
   } //endif $roles
 }
-
 
 /**
  * Manual sync form. Provides a submit button to manually sync groups to roles.

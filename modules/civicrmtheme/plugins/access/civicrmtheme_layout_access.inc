@@ -5,10 +5,11 @@
  */
 
 class CivicrmLayoutAccess extends LayoutAccess {
+
   /**
    * Constructor for a Layout access rule.
    */
-  function __construct($plugin_name, array $data = array()) {
+  public function __construct($plugin_name, array $data = array()) {
     parent::__construct($plugin_name, $data);
     $this->settings += array(
       'civicrm' => array(),
@@ -18,10 +19,10 @@ class CivicrmLayoutAccess extends LayoutAccess {
   /**
    * {@inheritdoc}
    */
-  function summary() {
+  public function summary() {
     $civicrm = array(
       'admin' => t('Admin'),
-      'public' => t('Public')
+      'public' => t('Public'),
     );
     $names = array();
     foreach ($this->settings['civicrm'] as $civi) {
@@ -36,7 +37,7 @@ class CivicrmLayoutAccess extends LayoutAccess {
   /**
    * {@inheritdoc}
    */
-  function checkAccess() {
+  public function checkAccess() {
     if (arg(0) != 'civicrm') {
       return FALSE;
     }
@@ -55,17 +56,19 @@ class CivicrmLayoutAccess extends LayoutAccess {
     $item = CRM_Core_Menu::get($path);
 
     // Check path for public or not and use layout if matches settings
-    switch(CRM_Utils_Array::value('is_public', $item)) {
+    switch (CRM_Utils_Array::value('is_public', $item)) {
       case TRUE:
         if (in_array('public', $this->settings['civicrm'])) {
           return TRUE;
         }
         break;
+
       case FALSE:
         if (in_array('admin', $this->settings['civicrm'])) {
           return TRUE;
         }
         break;
+
       default:
         return FALSE;
     }
@@ -74,11 +77,11 @@ class CivicrmLayoutAccess extends LayoutAccess {
   /**
    * {@inheritdoc}
    */
-  function form(&$form, &$form_state) {
+  public function form(&$form, &$form_state) {
     parent::form($form, $form_state);
     $options = array(
       'admin' => t('Admin'),
-      'public' => t('Public')
+      'public' => t('Public'),
     );
     $form['civicrm'] = array(
       '#title' => t('CiviCRM pages'),
@@ -92,8 +95,9 @@ class CivicrmLayoutAccess extends LayoutAccess {
   /**
    * {@inheritdoc}
    */
-  function formSubmit($form, &$form_state) {
+  public function formSubmit($form, &$form_state) {
     parent::formSubmit($form, $form_state);
     $this->settings['civicrm'] = array_keys(array_filter($form_state['values']['civicrm']));
   }
+
 }

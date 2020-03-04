@@ -26,11 +26,24 @@
  * Backdrop module file.
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2019
+ * @copyright CiviCRM LLC https://civicrm.org/licensing
  */
 require_once 'civicrm_user.inc';
 
 define('CIVICRM_UF_HEAD', TRUE);
+
+/**
+ * Minimum required PHP
+ *
+ * Note: This duplicates CRM_Upgrade_Form::MINIMUM_PHP_VERSION. The
+ * duplication helps avoid a dependency-loop. (Reading `Form::MINIMUM_PHP_VERSION`
+ * requires loading `civicrm.settings.php`, but that triggers a parse-error
+ * on PHP 5.x.)
+ *
+ * @see CRM_Upgrade_Form::MINIMUM_PHP_VERSION
+ * @see CiviDrupal\PhpVersionTest::testConstantMatch()
+ */
+define('CIVICRM_DRUPAL_PHP_MINIMUM', '7.0.0');
 
 /**
  * Adds CiviCRM CSS and JS resources into the header.
@@ -216,9 +229,8 @@ function civicrm_profile_form_validate($form, &$form_state) {
  */
 function civicrm_initialize() {
   // Check for php version and ensure its greater than minPhpVersion
-  $minPhpVersion = '5.3.4';
-  if (version_compare(PHP_VERSION, $minPhpVersion) < 0) {
-    echo "CiviCRM requires PHP Version $minPhpVersion or greater. You are running PHP Version " . PHP_VERSION . "<p>";
+  if (version_compare(PHP_VERSION, CIVICRM_DRUPAL_PHP_MINIMUM) < 0) {
+    echo "CiviCRM requires PHP " . CIVICRM_DRUPAL_PHP_MINIMUM . "+. The web server is running PHP " . PHP_VERSION . ".<p>";
     exit();
   }
   _civicrm_registerClassLoader();
@@ -268,11 +280,10 @@ function civicrm_initialize() {
     if (!include_once 'CRM/Core/Config.php') {
       $failure = TRUE;
       backdrop_set_message(t("<strong><p class='error'>Oops! - The path for including CiviCRM code files is not set properly. Most likely there is an error in the <em>civicrm_root</em> setting in your CiviCRM settings file (!1). </p><p class='error'> &raquo; civicrm_root is currently set to: <em>!2</em></p><p class='error'>!3</p></strong>", array(
-          '!1' => $settingsFile,
-          '!2' => $civicrm_root,
-          '!3' => $errorMsgAdd,
-        ))
-      );
+        '!1' => $settingsFile,
+        '!2' => $civicrm_root,
+        '!3' => $errorMsgAdd,
+      )));
       return FALSE;
     }
 
@@ -397,7 +408,7 @@ function _civicrm_registerClassLoader() {
  *
  * @param string $default contact type
  *
- * @return string $ctype
+ * @return string
  *   Contact type
  */
 function civicrm_get_ctype($default = NULL) {
@@ -512,7 +523,7 @@ function civicrm_invoke() {
   $pageContent = CRM_Core_Invoke::invoke($args);
 
   $printedContent = ob_get_clean();
-  if (empty($pageContent) AND
+  if (empty($pageContent) and
     !empty($printedContent)
   ) {
     $pageContent = $printedContent;
@@ -732,7 +743,7 @@ function _civicrm_get_user_profile_id($name) {
         ));
         continue;
       }
-      catch (Exception $e){
+      catch (Exception $e) {
       }
     }
   }
@@ -880,6 +891,7 @@ function civicrm_autoload_info() {
     'civicrm_handler_relationship_phone' => 'modules/views/civicrm/civicrm_handler_relationship_phone.inc',
     'civicrm_handler_relationship_relationship' => 'modules/views/civicrm/civicrm_handler_relationship_relationship.inc',
     'civicrm_handler_relationship_website' => 'modules/views/civicrm/civicrm_handler_relationship_website.inc',
+    'civicrm_handler_relationship_participant' => 'modules/views/civicrm/civicrm_handler_relationship_participant.inc',
 
     // sort handlers
     'civicrm_handler_sort_address_pseudoconstant' => 'modules/views/civicrm/civicrm_handler_sort_address_pseudoconstant.inc',

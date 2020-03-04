@@ -4,5 +4,7 @@ version = 1.x-4.7
 package = CiviCRM
 backdrop = 1.x
 project = civicrm
-php = 5.4
+php = 7.0
 type = module
+
+stylesheets[all][] = civicrm_backdrop.css
