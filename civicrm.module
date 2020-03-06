@@ -41,9 +41,9 @@ define('CIVICRM_UF_HEAD', TRUE);
  * on PHP 5.x.)
  *
  * @see CRM_Upgrade_Form::MINIMUM_PHP_VERSION
- * @see CiviDrupal\PhpVersionTest::testConstantMatch()
+ * @see CiviBackdrop\PhpVersionTest::testConstantMatch()
  */
-define('CIVICRM_DRUPAL_PHP_MINIMUM', '7.0.0');
+define('CIVICRM_BACKDROP_PHP_MINIMUM', '7.0.0');
 
 /**
  * Adds CiviCRM CSS and JS resources into the header.
@@ -163,7 +163,7 @@ function civicrm_menu_alter(&$items) {
  * Display profile form in tabs on user account
  */
 function civicrm_profile_form($form, &$form_state, $account, $profile_name) {
-  $output = civicrm_form_data($account, $profile_name, TRUE);
+  $output = civicrm_form_data($form, $account, $profile_name, TRUE);
   if (!empty($output)) {
     $form['#attributes']['enctype'] = 'multipart/form-data';
     $form = array_merge($form, $output);
@@ -229,8 +229,8 @@ function civicrm_profile_form_validate($form, &$form_state) {
  */
 function civicrm_initialize() {
   // Check for php version and ensure its greater than minPhpVersion
-  if (version_compare(PHP_VERSION, CIVICRM_DRUPAL_PHP_MINIMUM) < 0) {
-    echo "CiviCRM requires PHP " . CIVICRM_DRUPAL_PHP_MINIMUM . "+. The web server is running PHP " . PHP_VERSION . ".<p>";
+  if (version_compare(PHP_VERSION, CIVICRM_BACKDROP_PHP_MINIMUM) < 0) {
+    echo "CiviCRM requires PHP " . CIVICRM_BACKDROP_PHP_MINIMUM . "+. The web server is running PHP " . PHP_VERSION . ".<p>";
     exit();
   }
   _civicrm_registerClassLoader();
@@ -601,7 +601,7 @@ function civicrm_user_form_validate($form, &$form_state) {
   // lets suppress key generation for all validation also
   civicrm_key_disable();
 
-  static $validated = FALSE;
+  $validated = &backdrop_static(__FUNCTION__, FALSE);
 
   if ($validated) {
     return;
@@ -610,10 +610,9 @@ function civicrm_user_form_validate($form, &$form_state) {
   $validated = TRUE;
 
   // check for either user/register or admin/people/create
-  $register
-    = ((arg(0) == 'user' && arg(1) == 'register') ||
-      (arg(0) == 'admin' && arg(1) == 'people' && arg(2) == 'create')
-    ) ? TRUE : FALSE;
+  $register = ((arg(0) == 'user' && arg(1) == 'register') ||
+    (arg(0) == 'admin' && arg(1) == 'people' && arg(2) == 'create')
+  ) ? TRUE : FALSE;
   $userID = NULL;
   if (!empty($form['#user'])) {
     $userID = CRM_Core_BAO_UFMatch::getContactId($form['#user']->uid);
@@ -631,6 +630,8 @@ function civicrm_user_form_validate($form, &$form_state) {
 /**
  * Retrieve the CiviCRM profile forms
  *
+ * @param $edit
+ *   Form array.
  * @param $account
  * @param $profile
  * @param $reset
@@ -638,7 +639,7 @@ function civicrm_user_form_validate($form, &$form_state) {
  *
  * @return array $output
  */
-function civicrm_form_data($account, $profile, $reset, $doNotProcess = FALSE) {
+function civicrm_form_data($edit, $account, $profile, $reset, $doNotProcess = FALSE) {
   // lets suppress key generation for all CMS forms
   civicrm_key_disable();
 
@@ -667,10 +668,10 @@ function civicrm_form_data($account, $profile, $reset, $doNotProcess = FALSE) {
     // do not allow edit for anon users in joomla frontend, CRM-4668, unless u have checksum CRM-5228
     $config = CRM_Core_Config::singleton();
     if ($config->userFrameworkFrontend) {
-      CRM_Contact_BAO_Contact_Permission::validateOnlyChecksum($userID, $this);
+      CRM_Contact_BAO_Contact_Permission::validateOnlyChecksum($userID, $edit);
     }
     else {
-      CRM_Contact_BAO_Contact_Permission::validateChecksumContact($userID, $this);
+      CRM_Contact_BAO_Contact_Permission::validateChecksumContact($userID, $edit);
     }
   }
   $ctype = CRM_Core_DAO::getFieldValue('CRM_Contact_DAO_Contact', $userID, 'contact_type');
@@ -873,6 +874,7 @@ function civicrm_autoload_info() {
     'civicrm_handler_filter_datetime' => 'modules/views/civicrm/civicrm_handler_filter_datetime.inc',
     'civicrm_handler_filter_domain' => 'modules/views/civicrm/civicrm_handler_filter_domain.inc',
     'civicrm_handler_filter_encounter_medium' => 'modules/views/civicrm/civicrm_handler_filter_encounter_medium.inc',
+    'civicrm_handler_filter_group_name' => 'modules/views/civicrm/civicrm_handler_filter_group_name.inc',
     'civicrm_handler_filter_group_status' => 'modules/views/civicrm/civicrm_handler_filter_group_status.inc',
     'civicrm_handler_filter_option' => 'modules/views/civicrm/civicrm_handler_filter_option.inc',
     'civicrm_handler_filter_pseudo_constant' => 'modules/views/civicrm/civicrm_handler_filter_pseudo_constant.inc',
@@ -884,14 +886,17 @@ function civicrm_autoload_info() {
     'civicrm_handler_relationship' => 'modules/views/civicrm/civicrm_handler_relationship.inc',
     'civicrm_handler_relationship_address' => 'modules/views/civicrm/civicrm_handler_relationship_address.inc',
     'civicrm_handler_relationship_contact2users' => 'modules/views/civicrm/civicrm_handler_relationship_contact2users.inc',
+    'civicrm_handler_relationship_group' => 'modules/views/civicrm/civicrm_handler_relationship_group.inc',
     'civicrm_handler_relationship_im' => 'modules/views/civicrm/civicrm_handler_relationship_im.inc',
     'civicrm_handler_relationship_location' => 'modules/views/civicrm/civicrm_handler_relationship_location.inc',
     'civicrm_handler_relationship_mail' => 'modules/views/civicrm/civicrm_handler_relationship_mail.inc',
     'civicrm_handler_relationship_memberships_contributions' => 'modules/views/civicrm/civicrm_handler_relationship_memberships_contributions.inc',
+    'civicrm_handler_relationship_participant' => 'modules/views/civicrm/civicrm_handler_relationship_participant.inc',
     'civicrm_handler_relationship_phone' => 'modules/views/civicrm/civicrm_handler_relationship_phone.inc',
     'civicrm_handler_relationship_relationship' => 'modules/views/civicrm/civicrm_handler_relationship_relationship.inc',
+    'civicrm_handler_relationship_standard_group_contact' => 'modules/views/civicrm/civicrm_handler_relationship_standard_group_contact.inc',
+    'civicrm_handler_relationship_standard_group' => 'modules/views/civicrm/civicrm_handler_relationship_standard_group.inc',
     'civicrm_handler_relationship_website' => 'modules/views/civicrm/civicrm_handler_relationship_website.inc',
-    'civicrm_handler_relationship_participant' => 'modules/views/civicrm/civicrm_handler_relationship_participant.inc',
 
     // sort handlers
     'civicrm_handler_sort_address_pseudoconstant' => 'modules/views/civicrm/civicrm_handler_sort_address_pseudoconstant.inc',

@@ -25,34 +25,42 @@
 
 
 /**
- * Heavily based on anonymous code contribution. No claim.
  * CiviCRM Views Integration
  */
-class civicrm_handler_filter_group_status extends views_handler_filter_in_operator {
-
-  public static $groupContactStatus = NULL;
+class civicrm_handler_filter_group_name extends views_handler_filter_in_operator {
+  private $civi_groups;
+  protected $is_standard = TRUE;
 
   public function construct() {
     parent::construct();
 
-    if (!self::$groupContactStatus) {
+    if (empty($this->civi_groups)) {
       if (!civicrm_initialize()) {
         return;
       }
-      self::$groupContactStatus = array(
-        0 => 'Added',
-        1 => 'Removed',
-        2 => 'Pending',
-      );
+      $standard_or_smart = ($this->is_standard ? 'IS NULL' : 'IS NOT NULL');
+      $result = civicrm_api3('Group', 'get', [
+        'return' => ["name", "title"],
+        'is_hidden' => 0,
+        'is_active' => 1,
+        'saved_search_id' => [$standard_or_smart => 1],
+        'options' => ['limit' => 0, 'sort' => "title"],
+      ]);
+      $this->civi_groups = [];
+      foreach ($result['values'] as $group) {
+        if (isset($group['name'])) {
+          $this->civi_groups[$group['name']] = $group['title'];
+        }
+      }
     }
   }
 
   public function get_value_options() {
     if (!isset($this->value_options)) {
-      $this->value_title = t('Contact Group Status');
-      $options = array();
-      foreach (self::$groupContactStatus as $id => $name) {
-        $options[$name] = $name;
+      $this->value_title = t('Contact Group Title');
+      $options = [];
+      foreach ($this->civi_groups as $name => $title) {
+        $options[$name] = $title;
       }
       $this->value_options = $options;
     }

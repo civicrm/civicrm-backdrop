@@ -651,9 +651,9 @@ function civicrm_group_roles_add_remove_groups($account, $roles, $op) {
     //end if contact_id
 
     else {
-      watchdog('civicrm_group_roles', 'CiviCRM contact not found for Backdrop user ID @id', array('@id' => $user->uid), WATCHDOG_ERROR);
+      watchdog('civicrm_group_roles', 'CiviCRM contact not found for Backdrop user ID @id', array('@id' => $account->uid), WATCHDOG_ERROR);
       if ($debug_mode) {
-        backdrop_set_message(t('CiviCRM contact not found for Backdrop user ID @id', array('@id' => $user->uid)));
+        backdrop_set_message(t('CiviCRM contact not found for Backdrop user ID @id', array('@id' => $account->uid)));
       }
     }
 
