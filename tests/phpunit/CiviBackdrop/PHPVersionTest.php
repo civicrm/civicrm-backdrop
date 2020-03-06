@@ -13,13 +13,13 @@ class PhpVersionTest extends \PHPUnit\Framework\TestCase implements EndToEndInte
     $constantFile = $this->getBackdropModulePath() . '/civicrm.module';
     $this->assertFileExists($constantFile);
     $content = file_get_contents($constantFile);
-    if (preg_match(";define\\('CIVICRM_DRUPAL_PHP_MINIMUM', '(.*)'\\);", $content, $m)) {
+    if (preg_match(";define\\('CIVICRM_BACKDROP_PHP_MINIMUM', '(.*)'\\);", $content, $m)) {
       $a = preg_replace(';^(\d+\.\d+(?:\.[1-9]\d*)?).*$;', '\1', \CRM_Upgrade_Incremental_General::MIN_INSTALL_PHP_VER);
       $b = preg_replace(';^(\d+\.\d+(?:\.[1-9]\d*)?).*$;', '\1', $m[1]);
       $this->assertEquals($a, $b);
     }
     else {
-      $this->fail('Failed to find CIVICRM_DRUPAL_PHP_MINIMUM in ' . $constantFile);
+      $this->fail('Failed to find CIVICRM_BACKDROP_PHP_MINIMUM in ' . $constantFile);
     }
   }
 
