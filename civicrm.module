@@ -163,7 +163,7 @@ function civicrm_menu_alter(&$items) {
  * Display profile form in tabs on user account
  */
 function civicrm_profile_form($form, &$form_state, $account, $profile_name) {
-  $output = civicrm_form_data($account, $profile_name, TRUE);
+  $output = civicrm_form_data($form, $account, $profile_name, TRUE);
   if (!empty($output)) {
     $form['#attributes']['enctype'] = 'multipart/form-data';
     $form = array_merge($form, $output);
@@ -638,7 +638,7 @@ function civicrm_user_form_validate($form, &$form_state) {
  *
  * @return array $output
  */
-function civicrm_form_data($account, $profile, $reset, $doNotProcess = FALSE) {
+function civicrm_form_data($edit, $account, $profile, $reset, $doNotProcess = FALSE) {
   // lets suppress key generation for all CMS forms
   civicrm_key_disable();
 
@@ -1049,30 +1049,6 @@ function civicrm_preprocess_page(&$variables) {
   }
   if ($region = CRM_Core_Region::instance('html-header', FALSE)) {
     CRM_Utils_System::addHTMLHead($region->render(''));
-  }
-  // to increase it's flexibility.
-  if (module_exists('date_popup') && (in_array(arg(0), array('civicrm', 'user')))) {
-
-    /**
-     * Have hidden this function as it is not needed,
-     * but left as an example when we need to unset js
-     * in the future...
-     *
-     * // Only do this for pages that have JavaScript on them.
-     *  if (!empty($variables['scripts'])) {
-     *    $path = drupal_get_path('module', 'date_popup');
-     *    unset($scripts['module'][$path . '/lib/ui.datepicker.js']);
-     *    $variables['scripts'] = drupal_get_js('header', $scripts);
-     *  }
-     */
-
-    // Similar process for CSS but there are 2 CSS related variables.
-    // $variables['css'] and $variables['styles'] are both used.
-    if (!empty($variables['css'])) {
-      $path = drupal_get_path('module', 'date_popup');
-      unset($variables['css']['all']['module'][$path . '/themes/datepicker.css']);
-      $variables['styles'] = drupal_get_css($variables['css']);
-    }
   }
 }
 
