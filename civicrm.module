@@ -149,6 +149,10 @@ function civicrm_menu() {
  * Translating profile menu title dynamicaly to overide caching
  */
 function civicrm_menu_alter(&$items) {
+  if (!civicrm_initialize()) {
+    return;
+  }
+
   $profiles = civicrm_user_profiles();
   foreach ($profiles as $profile) {
     $path = 'user/%user/edit/' . $profile['name'];
