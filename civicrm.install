@@ -36,6 +36,11 @@ function civicrm_enable() {
   menu_link_save($options);
 
   if (!civicrm_initialize()) {
+    $installLink = url('civicrm/setup');
+    $message = t('<p class="error"><strong>CiviCRM is almost ready.</strong> You must <a href="@url">configure CiviCRM</a> for it to work.</p>', [
+      '@url' => $installLink,
+    ]);
+    backdrop_set_message($message, 'status', FALSE);
     return;
   }
 
@@ -67,7 +72,15 @@ function civicrm_requirements($phase) {
   switch ($phase) {
     case 'runtime':
       if (!civicrm_initialize()) {
-        return;
+        $installLink = url('civicrm/setup');
+        $requirements['civicrm'] = array(
+          'title' => $t("CiviCRM"),
+          'severity' => REQUIREMENT_ERROR,
+          'value' => $t('<p class="error"><strong>CiviCRM is almost ready.</strong> You must <a href="@url">configure CiviCRM</a> for it to work.</p>', [
+            '@url' => $installLink,
+          ]),
+        );
+        return $requirements;
       }
       $vc = new CRM_Utils_VersionCheck();
       $vc->fetch();

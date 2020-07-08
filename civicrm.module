@@ -120,6 +120,15 @@ function civicrm_menu() {
     'type' => 4,
     'weight' => 0,
   );
+  $items['civicrm/setup'] = array(
+    'title' => 'CiviCRM Setup',
+    'access callback' => TRUE,
+    'page callback' => 'civicrm_setup_page',
+    'file' => 'civicrm.setup.inc',
+    'access arguments' => array('administer modules'),
+    'type' => 4,
+    'weight' => 0,
+  );
   // administration section for civicrm integration modules.
   $items['admin/config/civicrm'] = array(
     'title' => 'CiviCRM',
@@ -266,13 +275,6 @@ function civicrm_initialize() {
     $loadedSettings = (bool) @include_once $settingsFile;
     if (!$loadedSettings) {
       $failure = TRUE;
-      if (user_access('administer modules')) {
-        $installLink = url('civicrm');
-        $message = t('<p class="error"><strong>CiviCRM is almost ready.</strong> You must <a href="@url">configure CiviCRM</a> for it to work.</p>', [
-          '@url' => $installLink,
-        ]);
-        backdrop_set_message($message);
-      }
       return FALSE;
     }
 
