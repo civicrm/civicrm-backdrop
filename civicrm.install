@@ -36,6 +36,11 @@ function civicrm_enable() {
   menu_link_save($options);
 
   if (!civicrm_initialize()) {
+    $installLink = url('civicrm/setup');
+    $message = t('<p class="error"><strong>CiviCRM is almost ready.</strong> You must <a href="@url">configure CiviCRM</a> for it to work.</p>', [
+      '@url' => $installLink,
+    ]);
+    backdrop_set_message($message, 'status', FALSE);
     return;
   }
 
@@ -62,37 +67,20 @@ function civicrm_uninstall() {
 }
 
 function civicrm_requirements($phase) {
-  global $base_url;
-  $civicrm_path = backdrop_get_path('module', 'civicrm');
-
-  //remove the last occurrence of 'backdrop' from path
-  $pos = strrpos($civicrm_path, 'backdrop');
-
-  if ($pos !== FALSE) {
-    $civicrm_path = substr_replace($civicrm_path, '', $pos, strlen($civicrm_path));
-  }
-
-  $url = $base_url . '/' . $civicrm_path . 'install/index.php?civicrm_install_type=backdrop';
-
   $requirements = array();
   $t = get_t();
   switch ($phase) {
-    case 'install':
-      $settings = glob('civicrm.settings.php');
-      if (empty($settings)) {
-        $requirements[] = array(
-          'title' => $t('CiviCRM settings does not exist'),
-          'value' =>
-          $t('CiviCRM settings file does not exist. It should be created by CiviCRM <a href="!link">install</a>',
-            array('!link' => $url)),
-          'severity' => REQUIREMENT_ERROR,
-        );
-      }
-      break;
-
     case 'runtime':
       if (!civicrm_initialize()) {
-        return;
+        $installLink = url('civicrm/setup');
+        $requirements['civicrm'] = array(
+          'title' => $t("CiviCRM"),
+          'severity' => REQUIREMENT_ERROR,
+          'value' => $t('<p class="error"><strong>CiviCRM is almost ready.</strong> You must <a href="@url">configure CiviCRM</a> for it to work.</p>', [
+            '@url' => $installLink,
+          ]),
+        );
+        return $requirements;
       }
       $vc = new CRM_Utils_VersionCheck();
       $vc->fetch();

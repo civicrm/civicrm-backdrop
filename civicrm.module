@@ -113,13 +113,19 @@ function civicrm_block_view($delta = '0') {
  * Implements hook_menu().
  */
 function civicrm_menu() {
-  if (!civicrm_initialize()) {
-    return;
-  }
   $items['civicrm'] = array(
     'title' => 'CiviCRM',
     'access callback' => TRUE,
     'page callback' => 'civicrm_invoke',
+    'type' => 4,
+    'weight' => 0,
+  );
+  $items['civicrm/setup'] = array(
+    'title' => 'CiviCRM Setup',
+    'access callback' => TRUE,
+    'page callback' => 'civicrm_setup_page',
+    'file' => 'civicrm.setup.inc',
+    'access arguments' => array('administer modules'),
     'type' => 4,
     'weight' => 0,
   );
@@ -143,6 +149,10 @@ function civicrm_menu() {
  * Translating profile menu title dynamicaly to overide caching
  */
 function civicrm_menu_alter(&$items) {
+  if (!civicrm_initialize()) {
+    return;
+  }
+
   $profiles = civicrm_user_profiles();
   foreach ($profiles as $profile) {
     $path = 'user/%user/edit/' . $profile['name'];
@@ -266,13 +276,9 @@ function civicrm_initialize() {
       )
     );
 
-    if (!include_once $settingsFile) {
+    $loadedSettings = (bool) @include_once $settingsFile;
+    if (!$loadedSettings) {
       $failure = TRUE;
-      $message = t("<strong><p class='error'> Oops! - The CiviCRM settings file (civicrm.settings.php) was not found in the expected location (!1) </p><p class='error'> !2 </p></strong>", array(
-        '!1' => $settingsFile,
-        '!2' => $errorMsgAdd,
-      ));
-      backdrop_set_message($message);
       return FALSE;
     }
 
@@ -455,7 +461,9 @@ function civicrm_invoke() {
 
   // make sure the system is initialized
   if (!civicrm_initialize()) {
-    return backdrop_not_found();
+    require_once __DIR__ . '/civicrm.setup.inc';
+    // NOTE: The setup page has a built-in authorization check.
+    return civicrm_setup_page();
   }
 
   civicrm_cache_disable();
@@ -989,7 +997,9 @@ function civicrm_form_alter(&$form, &$form_state, $formID) {
 function civicrm_user_admin_permissions_submit($form, &$form_state) {
   $role = $form_state['values']['roles']['anonymous'];
 
-  civicrm_initialize();
+  if (!civicrm_initialize()) {
+    return;
+  }
 
   $permissions = $form_state['values'][$role->name];
   $warning_permissions = CRM_Core_Permission::validateForPermissionWarnings($permissions);
@@ -1099,7 +1109,10 @@ function _civicrm_filter_tips($filter, $format, $long = FALSE) {
  * @return bool|mixed|string
  */
 function _civicrm_filter_process($text, $filter, $format, $langcode, $cache, $cache_id) {
-  civicrm_initialize();
+  if (!civicrm_initialize()) {
+    return t('(Content unavailable. CiviCRM is not installed.)');
+  }
+
   $config = CRM_Core_Config::singleton();
   $smarty = CRM_Core_Smarty::singleton();
   // as this file is not a class (not sure why) we need the require once
@@ -1292,7 +1305,9 @@ function civicrm_reviews() {
  * Implements hook_modules_installed().
  */
 function civicrm_modules_installed($modules) {
-  civicrm_initialize();
+  if (!civicrm_initialize()) {
+    return;
+  }
   CRM_Core_Invoke::rebuildMenuAndCaches(TRUE);
 }
 
@@ -1300,7 +1315,9 @@ function civicrm_modules_installed($modules) {
  * Implements hook_modules_enabled().
  */
 function civicrm_modules_enabled($modules) {
-  civicrm_initialize();
+  if (!civicrm_initialize()) {
+    return;
+  }
   CRM_Core_Invoke::rebuildMenuAndCaches(TRUE);
 }
 
@@ -1308,7 +1325,9 @@ function civicrm_modules_enabled($modules) {
  * Implements hook_modules_disabled().
  */
 function civicrm_modules_disabled($modules) {
-  civicrm_initialize();
+  if (!civicrm_initialize()) {
+    return;
+  }
   CRM_Core_Invoke::rebuildMenuAndCaches(TRUE);
 }
 
@@ -1316,7 +1335,9 @@ function civicrm_modules_disabled($modules) {
  * Implements hook_modules_uninstalled().
  */
 function civicrm_modules_uninstalled($modules) {
-  civicrm_initialize();
+  if (!civicrm_initialize()) {
+    return;
+  }
   CRM_Core_Invoke::rebuildMenuAndCaches(TRUE);
 }
 
