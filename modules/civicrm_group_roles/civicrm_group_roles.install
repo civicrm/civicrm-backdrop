@@ -82,7 +82,7 @@ function civicrm_group_roles_update_last_removed() {
  * Change role_id to role_name.
  */
 function civicrm_group_roles_update_1000() {
-  if (db_table_exists('civicrm_group_roles_rules') && db_field_exists('role_id')) {
+  if (db_table_exists('civicrm_group_roles_rules') && db_field_exists('civicrm_group_roles_rules', 'role_id')) {
     $new_field = array(
       'type' => 'varchar',
       'length' => 64,
