@@ -72,7 +72,7 @@ function civicrm_member_roles_update_1000() {
  * Change role_id to role_name.
  */
 function civicrm_member_roles_update_1001() {
-  if (db_table_exists('civicrm_member_roles_rules') && db_field_exists('rid')) {
+  if (db_table_exists('civicrm_member_roles_rules') && db_field_exists('civicrm_member_roles_rules', 'rid')) {
     $new_field = array(
       'type' => 'varchar',
       'length' => 64,
