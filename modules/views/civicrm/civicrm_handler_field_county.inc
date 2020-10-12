@@ -31,7 +31,7 @@
  */
 class civicrm_handler_field_county extends civicrm_handler_field_address {
 
-  static $_counties;
+  public static $_counties;
 
   public function construct() {
     parent::construct();
