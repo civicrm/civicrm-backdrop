@@ -72,6 +72,7 @@ class CivicrmChecksumLayoutAccess extends LayoutAccessNegatable {
           $status = 1;
         }
         break;
+
       case 2:
         if ($valid_checksum || user_is_logged_in()) {
           $status = 1;
