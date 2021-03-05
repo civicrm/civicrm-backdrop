@@ -3,11 +3,13 @@
  * @file
  * Plugin to provide access if two user account contexts are equal.
  */
+ 
 class CivicrmChecksumLayoutAccess extends LayoutAccessNegatable {
+  
   /**
    * Constructor for a Layout access rule.
    */
-  function __construct($plugin_name, array $data = array()) {
+  public function __construct($plugin_name, array $data = array()) {
     parent::__construct($plugin_name, $data);
     $this->settings += array(
       'validchecksum' => 1,
@@ -17,24 +19,30 @@ class CivicrmChecksumLayoutAccess extends LayoutAccessNegatable {
   /**
    * {@inheritdoc}
    */
-  function summary() {
+  public function summary() {
     $summary = t('CiviCRM checksum rule is not configured');
     if ($this->settings['negate']) {
       switch ($this->settings['validchecksum']) {
         case 1:
           $summary = t('Invalid CiviCRM checksum');
+          break;
+
         case 2:
           $summary = t('Invalid CiviCRM checksum and logged out user');
           break;
+
       }
     }
     else {
       switch ($this->settings['validchecksum']) {
         case 1:
           $summary = t('Valid CiviCRM checksum');
+          break;
+
         case 2:
           $summary = t('Valid CiviCRM checksum or logged in user');
           break;
+
       }
     }
     return $summary;
@@ -43,7 +51,7 @@ class CivicrmChecksumLayoutAccess extends LayoutAccessNegatable {
   /**
    * {@inheritdoc}
    */
-  function checkAccess() {
+  public function checkAccess() {
     if (!civicrm_initialize()) {
       return FALSE;
     }
@@ -84,7 +92,7 @@ class CivicrmChecksumLayoutAccess extends LayoutAccessNegatable {
   /**
    * {@inheritdoc}
    */
-  function form(&$form, &$form_state) {
+  public function form(&$form, &$form_state) {
     parent::form($form, $form_state);
     $form['helptext'] = array(
       '#type' => 'markup',
