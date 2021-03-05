@@ -3,9 +3,9 @@
  * @file
  * Plugin to provide access if two user account contexts are equal.
  */
- 
+
 class CivicrmChecksumLayoutAccess extends LayoutAccessNegatable {
-  
+
   /**
    * Constructor for a Layout access rule.
    */
@@ -77,9 +77,11 @@ class CivicrmChecksumLayoutAccess extends LayoutAccessNegatable {
           $status = 1;
         }
         break;
+
       default:
         $status = 0;
         break;
+
     }
     if ($this->settings['negate']) {
       return (!$status);
