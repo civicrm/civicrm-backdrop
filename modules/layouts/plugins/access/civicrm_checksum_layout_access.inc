@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Plugin to provide access if two user account contexts are equal.
+ * Plugin to provide access if a CiviCRM contact checksum is valid, or if a user is logged in.
  */
 
 class CivicrmChecksumLayoutAccess extends LayoutAccessNegatable {
