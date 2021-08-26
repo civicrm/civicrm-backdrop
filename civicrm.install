@@ -83,7 +83,6 @@ function civicrm_requirements($phase) {
         return $requirements;
       }
       $vc = new CRM_Utils_VersionCheck();
-      $vc->fetch();
       if ($vc->isInfoAvailable && isset($vc->versionInfo['patch']) && $vc->versionInfo['patch']['severity'] == 'critical') {
         $severity = REQUIREMENT_ERROR;
         $value = $vc->localVersion . ': ' . $vc->versionInfo['patch']['title'];
