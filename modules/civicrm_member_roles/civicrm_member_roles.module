@@ -109,6 +109,11 @@ function civicrm_member_roles_user_logout($account) {
   civicrm_member_roles_sync_user($account);
 }
 
+/**
+ * Helper to trigger sync on login/logout
+ *
+ * @param object $account
+ */
 function civicrm_member_roles_sync_user($account) {
   if (!civicrm_initialize()) {
     return;
@@ -136,7 +141,7 @@ function civicrm_member_roles_cron() {
  * @param string $action
  * @param int $id
  *
- * @return string|array
+ * @return string|array|NULL
  *   Array of rules or message if no rules.
  */
 function civicrm_member_roles_show_rules($action = NULL, $id = NULL) {
@@ -668,7 +673,7 @@ function _civicrm_member_roles_sync($ext_uid = NULL, $cid = NULL, $sync_type = N
  *
  * @param string $type
  *
- * @return array
+ * @return array|NULL
  *   Array of statuses or types.
  */
 function _civicrm_member_roles_get_data($type) {
