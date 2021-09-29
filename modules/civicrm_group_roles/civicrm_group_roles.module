@@ -82,6 +82,9 @@ function civicrm_group_roles_user_login(&$edit, $account) {
 /**
  * Helper function to add a user to Civi groups depending on their roles, when
  * the user is first created
+ *
+ * @param object $account
+ * @param array $roles
  */
 function civicrm_group_roles_add_groups_oncreate($account, $roles) {
   if (!civicrm_initialize()) {
@@ -307,7 +310,7 @@ function civicrm_group_roles_del_role($uid, $role_name) {
  * @param string $rid
  * @param int $group_id
  *
- * @return bool
+ * @return bool|null
  *   TRUE if there are groups.
  */
 function civicrm_role_granted_by_other_group($contact_id, $rid, $group_id) {
@@ -422,7 +425,7 @@ function civicrm_group_roles_permission() {
  * @param string $action
  * @param int $id
  *
- * @return string|array
+ * @return string|array|null
  *   Array of rules or message if none.
  */
 function civicrm_group_roles_show_rules($action = NULL, $id = NULL) {
