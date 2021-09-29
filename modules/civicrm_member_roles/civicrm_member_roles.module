@@ -302,7 +302,8 @@ function civicrm_member_roles_add_rule_form($form = NULL, $form_state = NULL, $i
   // We need to set the page title bc this menu entry is a local task.
   if (!empty($id) && is_numeric($id)) {
     backdrop_set_title('Edit rule');
-  } else {
+  }
+  else {
     backdrop_set_title('Create new rule');
   }
 
