@@ -371,7 +371,7 @@ function _civicrm_install_db($dbuser, $dbpass, $dbhost, $dbname,
 
   if ($loadGeneratedData) {
     drush_log(dt("Loading in generated data .."));
-    civicrm_source($dsn, $sqlPath . DIRECTORY_SEPARATOR . 'civicrm_generated.mysql', TRUE);
+    civicrm_source($dsn, $sqlPath . DIRECTORY_SEPARATOR . 'civicrm_generated.mysql');
   }
   else {
     // testing the translated sql files availability
