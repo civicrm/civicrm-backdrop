@@ -929,8 +929,6 @@ function civicrm_autoload_info() {
     'civicrm_handler_sort_state' => 'modules/views/civicrm/civicrm_handler_sort_state.inc',
 
     // argument handlers
-    'civicrm_plugin_argument_default' => 'modules/views/civicrm/civicrm_plugin_argument_default.inc',
-    'civicrm_plugin_argument_default_civicrm_id' => 'modules/views/civicrm/civicrm_plugin_argument_default_civicrm_id.inc',
     'views_handler_argument_civicrm_day' => 'modules/views/civicrm/views_handler_argument_civicrm_day.inc',
     'views_handler_argument_civicrm_fulldate' => 'modules/views/civicrm/views_handler_argument_civicrm_fulldate.inc',
     'views_handler_argument_civicrm_month' => 'modules/views/civicrm/views_handler_argument_civicrm_month.inc',
@@ -942,6 +940,8 @@ function civicrm_autoload_info() {
     'CivicrmChecksumLayoutAccess' => 'modules/layouts/plugins/access/civicrm_checksum_layout_access.inc',
 
     // Views plugins are mapped in hook_views_plugins() in civicrm.views.inc.
+    'civicrm_plugin_argument_default' => 'modules/views/plugins/civicrm_plugin_argument_default.inc',
+    'civicrm_plugin_argument_default_civicrm_id' => 'modules/views/plugins/civicrm_plugin_argument_default_civicrm_id.inc',
   );
 }
 
