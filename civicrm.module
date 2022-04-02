@@ -182,7 +182,7 @@ function civicrm_layout_access_info() {
     'class' => 'CivicrmChecksumLayoutAccess',
   );
   $info['civicrm_urls'] = array(
-    'title' => t('CiviCRM URLs'),
+    'title' => t('CiviCRM URL path and query'),
     'description' => t('Control access by the path and query parameters of the current CiviCRM page.'),
     'class' => 'CivicrmUrlLayoutAccess',
   );
