@@ -12,7 +12,7 @@ class CivicrmUrlLayoutAccess extends LayoutAccess {
   public function __construct($plugin_name, array $data = array()) {
     parent::__construct($plugin_name, $data);
     $this->settings += array(
-      'visibility_settings' => 1,
+      'visibility_setting' => 1,
       'civicrm_urls' => '',
     );
   }
@@ -25,7 +25,7 @@ class CivicrmUrlLayoutAccess extends LayoutAccess {
     $civicrm_urls = $this->settings['civicrm_urls'];
     $lines = array_map('trim', explode("\n", $civicrm_urls));
     $urls = implode(', ', $lines);
-    if ($this->settings['visibility_settings']) {
+    if ($this->settings['visibility_setting']) {
       $summary .= ' ' . t('Allow access on @urls', array('@urls' => $urls));
     }
     else {
@@ -76,11 +76,13 @@ class CivicrmUrlLayoutAccess extends LayoutAccess {
 
     $form['visibility_setting'] = array(
       '#type' => 'radios',
+      '#title' => t('Visibility'),
       '#options' => array(
         1 => t('Allow access on the following pages'),
         0 => t('Allow access on all pages except the following pages'),
       ),
       '#default_value' => $this->settings['visibility_setting'],
+      '#required' => TRUE,
     );
     $form['civicrm_urls'] = array(
       '#title' => t('CiviCRM URLs (path + query)'),
