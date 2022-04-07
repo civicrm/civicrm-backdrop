@@ -87,7 +87,7 @@ class CivicrmUrlLayoutAccess extends LayoutAccess {
     $form['civicrm_urls'] = array(
       '#title' => t('CiviCRM URLs (path + query)'),
       '#type' => 'textarea',
-      '#description' => t('Use this layout only for CiviCRM pages whose path and query parameters match one of the lines above. Enter just the path and query parameters (not the domain), like "civicrm/event/info?id=1", one URL per line. Query parameter order is irrelevant and extra query parameters in the page URL will be ignored, but all query parameters in the above must be present in the page URL.'),
+      '#description' => t('Enter one path (and query parameters) per line. Example paths are "civicrm/event/info?id=1" for one event, or "civicrm/event/info" for all events. Each line starts with "civicrm", not including the domain. Query parameter order is irrelevant and extra query parameters in the page URL will be ignored. But all query parameters in each line must be present in the page URL in order to have a match.'),
       '#required' => TRUE,
       '#default_value' => $this->settings['civicrm_urls'],
     );
