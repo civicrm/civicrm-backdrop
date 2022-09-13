@@ -49,6 +49,8 @@ class civicrm_plugin_argument_default_civicrm_id_current_user extends views_plug
         $contact_id = $uFMatch['contact_id'];
       }
     }
+
     return $contact_id;
   }
+
 }
