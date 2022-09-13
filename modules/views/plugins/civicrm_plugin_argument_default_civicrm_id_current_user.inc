@@ -31,11 +31,14 @@
  * Class civicrm_plugin_argument_default_civicrm_id_current_user
  */
 class civicrm_plugin_argument_default_civicrm_id_current_user extends views_plugin_argument_default {
-  function get_argument() {
+
+  /**
+   * Get the default argument (the CiviCRM ID) or return 0.
+   */
+  public function get_argument() {
     global $user;
     civicrm_initialize();
     $contact_id = 0;
-    
     $uFMatches = \Civi\Api4\UFMatch::get(FALSE)
       ->addSelect('contact_id')
       ->addWhere('uf_id', '=', $user->uid)
