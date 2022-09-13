@@ -36,21 +36,7 @@ class civicrm_plugin_argument_default_civicrm_id_current_user extends views_plug
    * Get the default argument (the CiviCRM ID) or return 0.
    */
   public function get_argument() {
-    global $user;
-    civicrm_initialize();
-    $contact_id = 0;
-    $uFMatches = \Civi\Api4\UFMatch::get(FALSE)
-      ->addSelect('contact_id')
-      ->addWhere('uf_id', '=', $user->uid)
-      ->setLimit(1)
-      ->execute();
-    foreach ($uFMatches as $uFMatch) {
-      if (!empty($uFMatch['contact_id'])) {
-        $contact_id = $uFMatch['contact_id'];
-      }
-    }
-
-    return $contact_id;
+    return CRM_Core_Session::getLoggedInContactID();
   }
 
 }
