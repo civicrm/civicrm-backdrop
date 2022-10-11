@@ -947,6 +947,7 @@ function civicrm_autoload_info() {
     // Views plugins are mapped in hook_views_plugins() in civicrm.views.inc.
     'civicrm_plugin_argument_default' => 'modules/views/plugins/civicrm_plugin_argument_default.inc',
     'civicrm_plugin_argument_default_civicrm_id' => 'modules/views/plugins/civicrm_plugin_argument_default_civicrm_id.inc',
+    'civicrm_plugin_argument_default_civicrm_id_current_user' => 'modules/views/plugins/civicrm_plugin_argument_default_civicrm_id_current_user.inc',
   );
 }
 
