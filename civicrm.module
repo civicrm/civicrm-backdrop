@@ -327,6 +327,19 @@ function civicrm_initialize() {
     CRM_Core_Config::singleton()->userSystem->setMySQLTimeZone();
   }
 
+  // Override Backdrop's CSS for CRM-provided UI. Need to add this inline
+  // because the location of the backdrop image depends on where the user has
+  // put the CiviCRM module.
+  global $civicrm_root;
+  $local_path = substr($civicrm_root, strlen(CRM_Utils_System::cmsRootPath()));
+  backdrop_add_css('
+#crm-container .ui-state-default,
+#crm-container .ui-widget-content .ui-state-default,
+#crm-container .ui-widget-header .ui-state-default {
+  background: #e6e6e6 url(' . $local_path . '/bower_components/jquery-ui/themes/smoothness/images/ui-bg_glass_75_e6e6e6_1x400.png) 50% 50% repeat-x;
+}
+', 'inline');
+
   return TRUE;
 }
 
