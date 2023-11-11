@@ -853,7 +853,7 @@ function civicrm_admin_bar_output_alter(&$content) {
 function civicrm_autoload_info() {
   return array(
 
-    // field handlers
+    // field handlers.
     'civicrm_handler_field' => 'modules/views/civicrm/civicrm_handler_field.inc',
     'civicrm_handler_field_activity' => 'modules/views/civicrm/civicrm_handler_field_activity.inc',
     'civicrm_handler_field_address' => 'modules/views/civicrm/civicrm_handler_field_address.inc',
@@ -1386,7 +1386,9 @@ function civicrm_modules_uninstalled($modules) {
  * If the metatag module is not installed this function will not fire.
  *
  */
-function civicrm_metatag_page_cache_cid_parts_alter(&$cid_parts) {
+function civicrm_metatag_page_cache_cid_parts_alter(&$cid_parts)
+
+{
   // Avoid substr() because it will not work with Backdrop language prefixes.
   if (!empty($cid_parts['path']) && strpos($cid_parts['path'], 'civicrm') !== FALSE) {
     $get = $_GET;
