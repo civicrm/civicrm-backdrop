@@ -583,7 +583,7 @@ function civicrm_group_roles_add_rule_form_submit($form, &$form_state) {
   // If edit_flag is not set then get next highest number.
   $config = config('civicrm_group_roles.settings');
   if (empty($form_state['values']['edit_flag'])) {
-    $id = max(array_keys($config->get('rules'))) + 1;
+    $id = max(array_keys(($config->get('rules') ?? []))) + 1;
   }
   else {
     $id = (int) $form_state['values']['edit_flag'];
