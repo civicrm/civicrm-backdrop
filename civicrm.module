@@ -170,6 +170,32 @@ function civicrm_menu_alter(&$items) {
 }
 
 /**
+ * Implements hook_telemetry_info().
+ */
+function civicrm_telemetry_info() {
+  $info['civicrm_version'] = array(
+    'label' => t('CiviCRM Version'),
+    'description' => t('The current version of CiviCRM in use.'),
+    'project' => 'civicrm',
+  );
+  return $info;
+}
+
+/**
+ * Implements hook_telemetry_data().
+ */
+function civicrm_telemetry_data($telemetry_key) {
+  if (!civicrm_initialize()) {
+    return;
+  }
+
+  switch ($telemetry_key) {
+    case 'civicrm_version':
+      return CRM_Utils_System::majorVersion();
+  }
+}
+
+/**
  * Implements hook_layout_access_info().
  *
  * Adding a CiviCRM checksum visibility condition and a URL condition that
