@@ -14,3 +14,11 @@
   background: transparent url(../i/logo_sm.png) 5% center no-repeat;
   background-size: 16px;
 }
+
+/**
+ * Prevent contact name overlapping the breadcrumb.
+ * @see https: //lab.civicrm.org/dev/backdrop/-/issues/84
+ */
+#crm-container div.crm-summary-contactname-block {
+  margin-top: 0px !important;
+}
