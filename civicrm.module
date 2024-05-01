@@ -851,27 +851,6 @@ function civicrm_translated_menu_link_alter(&$item) {
 }
 
 /**
- * Implements hook_admin_bar_output_alter().
- */
-function civicrm_admin_bar_output_alter(&$content) {
-  if (!civicrm_initialize()) {
-    return;
-  }
-
-  $weight = 10;
-  $content['menu']['menu']['civicrm'] = array(
-    '#title' => t('CiviCRM'),
-    '#attributes' => array('class' => array('civicrm')),
-    '#href' => 'civicrm',
-    '#options' => array(
-      'query' => array('reset' => 1),
-    ),
-    // #weight controls the order of links in the resulting item list.
-    '#weight' => $weight,
-  );
-}
-
-/**
  * Implements hook_autoload_info().
  */
 function civicrm_autoload_info() {
@@ -1017,6 +996,41 @@ function civicrm_add_jquery(&$html) {
   CRM_Core_Resources::singleton()->addCoreResources('html-header');
   // JS/CSS markup will be rendered in theme('page') by preprocess function
   return $html;
+}
+
+/**
+ * Implements hook_admin_bar_output_alter().
+ */
+function civicrm_admin_bar_output_alter(&$content) {
+  if (!civicrm_initialize()) {
+    return;
+  }
+
+  $content['menu']['menu']['civicrm'] = array(
+    '#title' => t('CiviCRM'),
+    '#attributes' => array('class' => array('civicrm')),
+    '#href' => 'civicrm',
+    '#options' => array(
+      'query' => array('reset' => 1),
+      'icon' => 'civicrm-civicrm',
+    ),
+    '#weight' => 10,
+  );
+}
+
+/**
+ * Implements hook_icon_info().
+ */
+function civicrm_icon_info() {
+  $icons = array();
+  $module_path = backdrop_get_path('module', 'civicrm');
+
+  $icons['civicrm-civicrm'] = array(
+    'directory' => $module_path . '/icons',
+    'name' => 'civicrm',
+  );
+
+  return $icons;
 }
 
 /**
