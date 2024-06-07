@@ -1006,9 +1006,14 @@ function civicrm_admin_bar_output_alter(&$content) {
     return;
   }
 
+  $classes = array('civicrm');
+  if (!function_exists('icon')) {
+    $classes[] = 'civicrm-icon-original';
+  }
+
   $content['menu']['menu']['civicrm'] = array(
     '#title' => t('CiviCRM'),
-    '#attributes' => array('class' => array('civicrm')),
+    '#attributes' => array('class' => $classes),
     '#href' => 'civicrm',
     '#options' => array(
       'query' => array('reset' => 1),
