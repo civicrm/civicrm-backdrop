@@ -218,26 +218,6 @@ function civicrm_telemetry_data($telemetry_key) {
 }
 
 /**
- * Implements hook_layout_access_info().
- *
- * Adding a CiviCRM checksum visibility condition and a URL condition that
- * considers the query parameters in the URL.
- */
-function civicrm_layout_access_info() {
-  $info['civicrm_checksum'] = array(
-    'title' => t('CiviCRM checksum'),
-    'description' => t('Has the page been loaded with a valid CiviCRM checksum?'),
-    'class' => 'CivicrmChecksumLayoutAccess',
-  );
-  $info['civicrm_urls'] = array(
-    'title' => t('CiviCRM URL path and query'),
-    'description' => t('Control access by the path and query parameters of the current CiviCRM page.'),
-    'class' => 'CivicrmUrlLayoutAccess',
-  );
-  return $info;
-}
-
-/**
  * Display profile form in tabs on user account
  */
 function civicrm_profile_form($form, &$form_state, $account, $profile_name) {

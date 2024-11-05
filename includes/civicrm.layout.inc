@@ -9,6 +9,18 @@ function civicrm_layout_access_info() {
     'description' => t('Control access by the current CiviCRM page.'),
     'class' => 'CivicrmLayoutAccess',
   );
+  // Add a CiviCRM checksum visibility condition.
+  $info['civicrm_checksum'] = array(
+    'title' => t('CiviCRM checksum'),
+    'description' => t('Has the page been loaded with a valid CiviCRM checksum?'),
+    'class' => 'CivicrmChecksumLayoutAccess',
+  );
+  // Add a URL condition that considers the query parameters in the URL.
+  $info['civicrm_urls'] = array(
+    'title' => t('CiviCRM URL path and query'),
+    'description' => t('Control access by the path and query parameters of the current CiviCRM page.'),
+    'class' => 'CivicrmUrlLayoutAccess',
+  );
   return $info;
 }
 
