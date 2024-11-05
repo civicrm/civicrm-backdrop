@@ -1,5 +1,5 @@
 {
-    "_config_name": "civicrmtheme.settings",
+    "_config_name": "civicrm.settings",
     "theme_admin": "seven",
     "theme_public": "0"
 }
