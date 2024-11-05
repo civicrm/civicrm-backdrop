@@ -946,10 +946,8 @@ function civicrm_autoload_info() {
     'views_handler_argument_civicrm_year' => 'modules/views/civicrm/views_handler_argument_civicrm_year.inc',
     'views_handler_argument_civicrm_year_month' => 'modules/views/civicrm/views_handler_argument_civicrm_year_month.inc',
 
-    // layout access
-    'CivicrmLayoutAccess' => 'plugins/access/civicrm_layout_access.inc',
-
     // layout visibility conditions handlers
+    'CivicrmLayoutAccess' => 'modules/layouts/plugins/access/civicrm_layout_access.inc',
     'CivicrmChecksumLayoutAccess' => 'modules/layouts/plugins/access/civicrm_checksum_layout_access.inc',
     'CivicrmUrlLayoutAccess' => 'modules/layouts/plugins/access/civicrm_url_layout_access.inc',
 
