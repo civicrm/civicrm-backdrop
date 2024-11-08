@@ -104,10 +104,6 @@ function civicrm_config_info() {
     'label' => t('CiviCRM settings'),
     'group' => t('Configuration'),
   );
-  $prefixes['layout.layout.civicrm_admin_default'] = array(
-    'label' => t('CiviCRM Default Layout'),
-    'group' => t('Layouts'),
-  );
   return $prefixes;
 }
 

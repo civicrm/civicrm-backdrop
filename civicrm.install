@@ -165,3 +165,13 @@ function civicrm_update_1001() {
 function civicrm_update_1002() {
   module_disable(array('civicrmtheme'));
 }
+
+/**
+ * Update the Default CiviCRM Layout.
+ */
+function civicrm_update_1003() {
+  // Should now belong to civicrm, not civicrmtheme.
+  $config = config('layout.layout.civicrm_admin_default');
+  $config->set('module', 'civicrm');
+  $config->save();
+}
