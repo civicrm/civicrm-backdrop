@@ -223,6 +223,22 @@ function civicrm_contact_ref_field_settings_form($field, $instance, $has_data) {
     );
   }
 
+  $form['callbacks'] = array(
+    '#type' => 'details',
+    '#summary' => t('Callback alternatives'),
+    '#details' => t('Callback functions can be used to provide contacts from CiviCRM as an alternative to the "Contact Type" options. The benefit of a callback is to provide more specific criteria than just "Contact type". The callback functions need to be added manually to the field settings, and implemented in a custom module.'),
+  );
+  $form['callbacks']['allowed_values_callback'] = array(
+    '#prefix' => '<h3>Autocomplete callback</h3><p>',
+    '#markup' => t('The values returned to the autocomplete widget. The function name needs to be defined in the field setting <code>allowed_values_callback</code>. Current callback: <code>@callback</code>', array('@callback' => isset($settings['allowed_values_callback']) ? $settings['allowed_values_callback'] : 'undefined')),
+    '#suffix' => '</p>',
+  );
+  $form['callbacks']['options_list_callback'] = array(
+    '#prefix' => '<h3>Options list callback</h3><p>',
+    '#markup' => t('The options to populate select, radio and checkbox widgets. The function name needs to be defined in the field setting <code>options_list_callback</code>. Current callback: <code>@callback</code>', array('@callback' => isset($settings['options_list_callback']) ? $settings['options_list_callback'] : 'undefined')),
+    '#suffix' => '</p>',
+  );
+
   return $form;
 }
 
@@ -285,7 +301,7 @@ function civicrm_contact_ref_autocomplete_value($field_name, $string = '') {
 /**
  * Fetch an array of all candidate referenced nodes.
  *
- * This info is used in various places (aloowed values, autocomplete results,
+ * This info is used in various places (allowed values, autocomplete results,
  * input validation...). Some of them only need the nids, others nid + titles,
  * others yet nid + titles + rendered row (for display in widgets).
  * The array we return contains all the potentially needed information, and lets
@@ -311,7 +327,8 @@ function civicrm_contact_ref_autocomplete_value($field_name, $string = '') {
 function _civicrm_contact_ref_potential_references($field, $string = '', $exact_string = FALSE) {
   static $results = array();
 
-  $references = _civicrm_contact_ref_potential_references_standard($field, $string, $exact_string);
+  $function = !empty($field['settings']['allowed_values_callback']) ? $field['settings']['allowed_values_callback'] : '_civicrm_contact_ref_potential_references_standard';
+  $references = $function($field, $string, $exact_string);
 
   // Store the results.
   $results[$field['field_name']][$string][$exact_string] = $references;
@@ -320,8 +337,14 @@ function _civicrm_contact_ref_potential_references($field, $string = '', $exact_
 }
 
 /**
- * Helper function for _civicrm_contact_ref_potential_references():
- * referenceable nodes defined by content types.
+ * Helper function for referenceable CiviCRM contacts.
+ *
+ * @param array $field
+ * @param string $string
+ * @param bool $exact_string
+ * @param string $limit
+ *
+ * @see _civicrm_contact_ref_potential_references()
  */
 function _civicrm_contact_ref_potential_references_standard($field, $string = '', $exact_string = FALSE, $limit = '10') {
   $args = $whereClause = $contactTypes = $contactSubTypes = array();
