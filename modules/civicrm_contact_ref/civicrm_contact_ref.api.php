@@ -11,7 +11,7 @@
  */
 
 /**
- * Callback for civicrm_contact_ref_allowed_values().
+ * Callback for civicrm_contact_ref_options_list_values().
  *   The function name needs to be defined in the field's setting
  *   <code>options_list_callback</code>, used for options lists.
  *
@@ -51,7 +51,7 @@ function callback_options_list_for_contact_reference($field, $instance, $entity_
  *   The function name needs to be defined in the field's setting
  *   <code>allowed_values_function</code>.
  */
-function callback_allowed_values_for_contact_reference($field, $string, $exact_string) {
+function callback_allowed_values_for_contact_reference($field_name, $entity_type, $bundle_name, $entity_id = '', $string, $exact_string) {
   if (!civicrm_initialize()) {
     return;
   }

@@ -10,6 +10,7 @@ function civicrm_contact_ref_menu() {
   $items['civicrm_contact_ref/autocomplete'] = array(
     'title' => 'Contacts',
     'page callback' => 'civicrm_contact_ref_autocomplete_value',
+    'delivery callback' => 'backdrop_json_deliver',
     'type' => MENU_CALLBACK,
     'access arguments' => array('access content'),
   );
@@ -154,14 +155,19 @@ function civicrm_contact_ref_field_formatter_view($entity_type, $entity, $field,
  *   A field instance array.
  * @param string $entity_type
  *   The type of entity; e.g. 'node' or 'user'.
- * @param EntityInterface $entity
- *   The entity object.
+ * @param EntityInterface|null $entity
+ *   The entity object or NULL if the entity hasn't been created yet.
  *
  * @return array
  *   The array of valid contacts.
  */
 function civicrm_contact_ref_options_list_values($field, $instance, $entity_type, $entity) {
-  $references = _civicrm_contact_ref_potential_references($field);
+  $entity_id = NULL;
+  if ($entity) {
+    $entity_id = $entity->id();
+  }
+
+  $references = _civicrm_contact_ref_potential_references($field['field_name'], $entity_type, $instance['bundle'], $entity_id);
 
   $options = array();
   foreach ($references as $key => $value) {
@@ -182,9 +188,21 @@ function civicrm_contact_ref_field_widget_form(&$form, &$form_state, $field, $in
     $defaultValues[] = "$sort_name [cid:{$item['contact_id']}]";
   }
 
+  $entity = isset($element['#entity']) ? $element['#entity'] : NULL;
+
+  $autocomplete_path = $instance['widget']['settings']['autocomplete_path'] . '/' . $field['field_name'] . '/' . $instance['entity_type'] . '/' . $instance['bundle'] . '/';
+
+  // Use <NULL> as a placeholder in the URL when there's no entity.
+  // Most webservers collapse two consecutive slashes.
+  $entity_id = 'NULL';
+  if ($entity) {
+    $entity_id = $entity->id();
+  }
+  $autocomplete_path .= $entity_id;
+
   $element += array(
     '#type' => 'textfield',
-    '#autocomplete_path' => $instance['widget']['settings']['autocomplete_path'] . '/' . $field['field_name'],
+    '#autocomplete_path' => $autocomplete_path,
     '#size' => $instance['widget']['settings']['size'],
     '#maxlength' => 1024,
     '#default_value' => empty($defaultValues[$delta]) ? '' : $defaultValues[$delta],
@@ -267,8 +285,12 @@ function civicrm_contact_ref_field_settings_form($field, $instance, $has_data) {
  */
 function civicrm_contact_ref_autocomplete_validate($element, &$form_state) {
 
-  $field     = field_info_field($element['#field_name']);
   $value     = $element['#value'];
+  $entity = isset($element['#entity']) ? $element['#entity'] : NULL;
+  $entity_id = NULL;
+  if ($entity) {
+    $entity_id = $entity->id();
+  }
 
   $cid = NULL;
   if (!empty($value)) {
@@ -279,7 +301,7 @@ function civicrm_contact_ref_autocomplete_validate($element, &$form_state) {
     }
     else {
       // No explicit cid.
-      $cids = _civicrm_contact_ref_potential_references($field, $value, TRUE);
+      $cids = _civicrm_contact_ref_potential_references($element['#field_name'], $element['#entity_type'], $element['#bundle'], $entity_id, $value, TRUE);
       if (empty($cids)) {
         form_error($element, t('%name: found no valid post with that title.', array('%name' => $element['#title'])));
       }
@@ -297,21 +319,42 @@ function civicrm_contact_ref_autocomplete_validate($element, &$form_state) {
 }
 
 /**
- * Function to provide values for autocomplete civicrm contact
+ * Menu callback to provide values for autocomplete civicrm contact
  * element, depends upon entered string.
  *
  * @param string $field_name
+ *   The name of the contact reference field.
+ * @param string $entity_type
+ *   The entity type.
+ * @param string $bundle_name
+ *   The bundle name.
+ * @param string $entity_id
+ *   The entity ID the contact reference field is attached to, or an empty
+ *   string if the entity hasn't been created yet.
  * @param string $string
+ *   The label of the Contact to query by.
  */
-function civicrm_contact_ref_autocomplete_value($field_name, $string = '') {
+function civicrm_contact_ref_autocomplete_value($field_name, $entity_type, $bundle_name, $entity_id = '', $string = '') {
   if (!civicrm_initialize()) {
     return;
   }
 
-  $field = field_info_field($field_name);
+  // If the request has a '/' in the search text, then the menu system will have
+  // split it into multiple arguments and $string will only be a partial.
+  // Make sure to recover the intended $string.
+  $args = func_get_args();
+  // Shift off the $type, $field_name, $entity_type,
+  // $bundle_name, and $entity_id args.
+  array_shift($args);
+  array_shift($args);
+  array_shift($args);
+  array_shift($args);
+  array_shift($args);
+  $string = implode('/', $args);
+
   $matches = array();
 
-  $references = _civicrm_contact_ref_potential_references($field, $string);
+  $references = _civicrm_contact_ref_potential_references($field_name, $entity_type, $bundle_name, $entity_id, $string);
   foreach ($references as $id => $row) {
     // Add a class wrapper for a few required CSS overrides.
     $matches["{$row['title']} [cid:{$id}]"] = '<div class="reference-autocomplete">' . $row['rendered'] . '</div>';
@@ -328,12 +371,19 @@ function civicrm_contact_ref_autocomplete_value($field_name, $string = '') {
  * The array we return contains all the potentially needed information, and lets
  * consumers use the parts they actually need.
  *
- * @param array $field
- *   The field description.
+ * @param string $field_name
+ *   The name of the contact reference field.
+ * @param string $entity_type
+ *   The entity type.
+ * @param string $bundle_name
+ *   The bundle name.
+ * @param string|null $entity_id
+ *   The entity ID the contact reference field is attached to, or an empty
+ *   string if the entity hasn't been created yet.
  * @param string $string
  *   Optional string to filter titles on (used by autocomplete)
  * @param bool $exact_string
- *   Optional: should the title filter be an exact match.
+ *   Should the title filter be an exact match. Defaults to FALSE.
  *
  * @return array
  *   An array of valid nodes in the form:
@@ -345,11 +395,13 @@ function civicrm_contact_ref_autocomplete_value($field_name, $string = '') {
  *     ...
  *   )
  */
-function _civicrm_contact_ref_potential_references($field, $string = '', $exact_string = FALSE) {
+function _civicrm_contact_ref_potential_references($field_name, $entity_type, $bundle_name, $entity_id, $string = '', $exact_string = FALSE) {
   static $results = array();
 
+  $field = field_info_field($field_name);
+
   $function = !empty($field['settings']['allowed_values_function']) ? $field['settings']['allowed_values_function'] : '_civicrm_contact_ref_potential_references_standard';
-  $references = $function($field, $string, $exact_string);
+  $references = $function($field_name, $entity_type, $bundle_name, $entity_id, $string, $exact_string);
 
   // Store the results.
   $results[$field['field_name']][$string][$exact_string] = $references;
@@ -360,12 +412,19 @@ function _civicrm_contact_ref_potential_references($field, $string = '', $exact_
 /**
  * Helper function for referenceable CiviCRM contacts.
  *
- * @param array $field
- *   The field description.
+ * @param string $field_name
+ *   The name of the contact reference field.
+ * @param string $entity_type
+ *   The entity type.
+ * @param string $bundle_name
+ *   The bundle name.
+ * @param string|null $entity_id
+ *   The entity ID the contact reference field is attached to, or an empty
+ *   string if the entity hasn't been created yet.
  * @param string $string
  *   Optional string to filter titles on (used by autocomplete)
  * @param bool $exact_string
- *   Optional: should the title filter be an exact match.
+ *   Should the title filter be an exact match. Defaults to FALSE.
  *
  * @return array
  *   Nested array of references keyed by the contact ID containing an array of
@@ -373,13 +432,15 @@ function _civicrm_contact_ref_potential_references($field, $string = '', $exact_
  *
  * @see _civicrm_contact_ref_potential_references()
  */
-function _civicrm_contact_ref_potential_references_standard($field, $string = '', $exact_string = FALSE) {
+function _civicrm_contact_ref_potential_references_standard($field_name, $entity_type, $bundle_name, $entity_id, $string = '', $exact_string = FALSE) {
   $args = $whereClause = $contactTypes = $contactSubTypes = array();
   $limit = '10';
 
   if (!civicrm_initialize()) {
     return;
   }
+
+  $field = field_info_field($field_name);
 
   require_once 'CRM/Contact/BAO/ContactType.php';
   $basicTypes = CRM_Contact_BAO_ContactType::basicTypePairs();
@@ -457,6 +518,7 @@ function _civicrm_contact_ref_potential_references_standard($field, $string = ''
  *
  * @param int $cid
  * @param string $field
+ *
  * @return string|null
  */
 function _civicrm_contact_ref_titles($cid, $field = 'display_name') {
