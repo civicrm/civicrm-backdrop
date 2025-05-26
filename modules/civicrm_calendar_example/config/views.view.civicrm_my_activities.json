@@ -3,7 +3,7 @@
     "name": "civicrm_my_activities",
     "description": "Calendar of CiviCRM Activities - Assigned to logged in user",
     "module": "civicrm",
-    "storage": 2,
+    "storage": 4,
     "tag": "civicrm",
     "disabled": false,
     "base_table": "civicrm_activity",
@@ -181,6 +181,46 @@
                         "date_fields": {
                             "civicrm_activity.activity_date_time": "civicrm_activity.activity_date_time"
                         }
+                    },
+                    "uf_id": {
+                        "id": "uf_id",
+                        "table": "civicrm_uf_match",
+                        "field": "uf_id",
+                        "relationship": "contact_id",
+                        "group_type": "group",
+                        "ui_name": "",
+                        "default_action": "default",
+                        "exception": {
+                            "value": "all",
+                            "title_enable": 0,
+                            "title": "All"
+                        },
+                        "title_enable": 0,
+                        "title": "",
+                        "breadcrumb_enable": 0,
+                        "breadcrumb": "",
+                        "default_argument_type": "current_user",
+                        "default_argument_options": "",
+                        "default_argument_skip_url": 0,
+                        "summary_options": {
+                            "base_path": "",
+                            "count": "1",
+                            "items_per_page": "25",
+                            "override": 0
+                        },
+                        "summary": {
+                            "sort_order": "asc",
+                            "number_of_records": "0",
+                            "format": "default_summary"
+                        },
+                        "specify_validation": 0,
+                        "validate": {
+                            "type": "none",
+                            "fail": "not found"
+                        },
+                        "validate_options": [],
+                        "break_phrase": 0,
+                        "not": 0
                     }
                 },
                 "filters": {
@@ -358,6 +398,46 @@
                         "date_fields": {
                             "civicrm_activity.activity_date_time": "civicrm_activity.activity_date_time"
                         }
+                    },
+                    "uf_id": {
+                        "id": "uf_id",
+                        "table": "civicrm_uf_match",
+                        "field": "uf_id",
+                        "relationship": "contact_id",
+                        "group_type": "group",
+                        "ui_name": "",
+                        "default_action": "default",
+                        "exception": {
+                            "value": "all",
+                            "title_enable": 0,
+                            "title": "All"
+                        },
+                        "title_enable": 0,
+                        "title": "",
+                        "breadcrumb_enable": 0,
+                        "breadcrumb": "",
+                        "default_argument_type": "current_user",
+                        "default_argument_options": "",
+                        "default_argument_skip_url": 0,
+                        "summary_options": {
+                            "base_path": "",
+                            "count": "1",
+                            "items_per_page": "25",
+                            "override": 0
+                        },
+                        "summary": {
+                            "sort_order": "asc",
+                            "number_of_records": "0",
+                            "format": "default_summary"
+                        },
+                        "specify_validation": 0,
+                        "validate": {
+                            "type": "none",
+                            "fail": "not found"
+                        },
+                        "validate_options": [],
+                        "break_phrase": 0,
+                        "not": 0
                     }
                 },
                 "path": "myactivities/week",
@@ -424,6 +504,46 @@
                         "date_fields": {
                             "civicrm_activity.activity_date_time": "civicrm_activity.activity_date_time"
                         }
+                    },
+                    "uf_id": {
+                        "id": "uf_id",
+                        "table": "civicrm_uf_match",
+                        "field": "uf_id",
+                        "relationship": "contact_id",
+                        "group_type": "group",
+                        "ui_name": "",
+                        "default_action": "default",
+                        "exception": {
+                            "value": "all",
+                            "title_enable": 0,
+                            "title": "All"
+                        },
+                        "title_enable": 0,
+                        "title": "",
+                        "breadcrumb_enable": 0,
+                        "breadcrumb": "",
+                        "default_argument_type": "current_user",
+                        "default_argument_options": "",
+                        "default_argument_skip_url": 0,
+                        "summary_options": {
+                            "base_path": "",
+                            "count": "1",
+                            "items_per_page": "25",
+                            "override": 0
+                        },
+                        "summary": {
+                            "sort_order": "asc",
+                            "number_of_records": "0",
+                            "format": "default_summary"
+                        },
+                        "specify_validation": 0,
+                        "validate": {
+                            "type": "none",
+                            "fail": "not found"
+                        },
+                        "validate_options": [],
+                        "break_phrase": 0,
+                        "not": 0
                     }
                 },
                 "path": "myactivities/day",
@@ -490,6 +610,46 @@
                         "date_fields": {
                             "civicrm_activity.activity_date_time": "civicrm_activity.activity_date_time"
                         }
+                    },
+                    "uf_id": {
+                        "id": "uf_id",
+                        "table": "civicrm_uf_match",
+                        "field": "uf_id",
+                        "relationship": "contact_id",
+                        "group_type": "group",
+                        "ui_name": "",
+                        "default_action": "default",
+                        "exception": {
+                            "value": "all",
+                            "title_enable": 0,
+                            "title": "All"
+                        },
+                        "title_enable": 0,
+                        "title": "",
+                        "breadcrumb_enable": 0,
+                        "breadcrumb": "",
+                        "default_argument_type": "current_user",
+                        "default_argument_options": "",
+                        "default_argument_skip_url": 0,
+                        "summary_options": {
+                            "base_path": "",
+                            "count": "1",
+                            "items_per_page": "25",
+                            "override": 0
+                        },
+                        "summary": {
+                            "sort_order": "asc",
+                            "number_of_records": "0",
+                            "format": "default_summary"
+                        },
+                        "specify_validation": 0,
+                        "validate": {
+                            "type": "none",
+                            "fail": "not found"
+                        },
+                        "validate_options": [],
+                        "break_phrase": 0,
+                        "not": 0
                     }
                 },
                 "path": "myactivities/year",
