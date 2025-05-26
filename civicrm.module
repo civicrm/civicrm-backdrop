@@ -951,6 +951,9 @@ function civicrm_autoload_info() {
     'civicrm_plugin_argument_default' => 'modules/views/plugins/civicrm_plugin_argument_default.inc',
     'civicrm_plugin_argument_default_civicrm_id' => 'modules/views/plugins/civicrm_plugin_argument_default_civicrm_id.inc',
     'civicrm_plugin_argument_default_civicrm_id_current_user' => 'modules/views/plugins/civicrm_plugin_argument_default_civicrm_id_current_user.inc',
+
+    // Row plugins
+    'calendar_plugin_row_civicrm' => 'modules/views/plugins/calendar_plugin_row_civicrm.inc',
   );
 }
 
