@@ -1,11 +1,11 @@
 {
     "_config_name": "views.view.civicrm_my_activities",
     "name": "civicrm_my_activities",
-    "description": "Calendar of CiviCRM Activities - Assigned to logged in user",
+    "description": "Calendar of CiviCRM Activities - Assigned to logged in user. Requires Calendar module.",
     "module": "civicrm",
     "storage": 4,
     "tag": "civicrm",
-    "disabled": false,
+    "disabled": true,
     "base_table": "civicrm_activity",
     "human_name": "CiviCRM My Activities",
     "core": "1.0",

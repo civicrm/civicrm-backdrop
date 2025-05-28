@@ -1,9 +1,0 @@
-name = CiviCRM Calendar Example
-description = An example Views integration with Calendar module. The module can be uninstalled after enabling.
-backdrop = 1.x
-type = module
-package = CiviCRM
-project = civicrm
-
-dependencies[] = civicrm
-dependencies[] = calendar
