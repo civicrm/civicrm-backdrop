@@ -22,3 +22,15 @@
 #crm-container div.crm-summary-contactname-block {
   margin-top: 0px !important;
 }
+
+/**
+ * Allow for a wide container to fit in wide tables.
+ * @see https: //lab.civicrm.org/dev/backdrop/-/issues/93
+ */
+.crm-container-wide .container {
+  max-width: 1320px !important;
+}
+
+.crm-container-fluid .container {
+  max-width: 100% !important;
+}

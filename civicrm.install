@@ -175,3 +175,12 @@ function civicrm_update_1003() {
   $config->set('module', 'civicrm');
   $config->save();
 }
+
+/**
+ * Set CiviCRM admin container width.
+ */
+function civicrm_update_1004() {
+  $config = config('civicrm.settings');
+  $config->set('container_width', 'default');
+  $config->save();
+}
