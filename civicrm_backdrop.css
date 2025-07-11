@@ -28,9 +28,10 @@
  * @see https: //lab.civicrm.org/dev/backdrop/-/issues/93
  */
 .crm-container-wide .container {
-  max-width: 1320px !important;
+  /* An XXL breakpoint, equivalent to 87.5em / 85rem, with 16px font-size in Seven. */
+  max-width: 1360px !important;
 }
 
 .crm-container-fluid .container {
-  max-width: 100% !important;
+  max-width: none !important;
 }
