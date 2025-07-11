@@ -22,3 +22,16 @@
 #crm-container div.crm-summary-contactname-block {
   margin-top: 0px !important;
 }
+
+/**
+ * Allow for a wide container to fit in wide tables.
+ * @see https: //lab.civicrm.org/dev/backdrop/-/issues/93
+ */
+.crm-container-wide .container {
+  /* An XXL breakpoint, equivalent to 87.5em / 85rem, with 16px font-size in Seven. */
+  max-width: 1360px !important;
+}
+
+.crm-container-fluid .container {
+  max-width: none !important;
+}

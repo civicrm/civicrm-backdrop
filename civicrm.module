@@ -1136,6 +1136,14 @@ function civicrm_preprocess_page(&$variables) {
   if ($region = CRM_Core_Region::instance('html-header', FALSE)) {
     CRM_Utils_System::addHTMLHead($region->render(''));
   }
+
+  $config = config('civicrm.settings');
+  if ($config->get('container_width') == 'wide') {
+    $variables['classes'][] = 'crm-container-wide';
+  }
+  elseif ($config->get('container_width') == 'fluid') {
+    $variables['classes'][] = 'crm-container-fluid';
+  }
 }
 
 /**
@@ -1493,6 +1501,18 @@ function civicrm_form_system_themes_admin_form_alter(&$form, $form_state) {
     '#default_value' => $config->get('theme_public'),
   );
 
+  $form['admin_theme']['civicrm']['container_width'] = array(
+    '#type' => 'select',
+    '#options' => array(
+      'default' => t('Default'),
+      'wide' => t('Wide'),
+      'fluid' => t('Fluid'),
+    ),
+    '#title' => t('CiviCRM Container Width'),
+    '#description' => t('Choose the container width for CiviCRM admin pages.'),
+    '#default_value' => $config->get('container_width'),
+  );
+
   // Add extra submit
   $form['#submit'][] = 'civicrm_system_themes_admin_form_submit';
   $form['admin_theme']['actions']['#weight'] = 10;
@@ -1505,6 +1525,7 @@ function civicrm_system_themes_admin_form_submit($form, &$form_state) {
   $config = config('civicrm.settings');
   $config->set('theme_admin', $form_state['values']['civicrm_admin']);
   $config->set('theme_public', $form_state['values']['civicrm_public']);
+  $config->set('container_width', $form_state['values']['container_width']);
   $config->save();
 }
 
