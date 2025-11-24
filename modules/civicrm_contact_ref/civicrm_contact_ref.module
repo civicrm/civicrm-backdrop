@@ -437,7 +437,7 @@ function _civicrm_contact_ref_potential_references_standard($field_name, $entity
   $limit = '10';
 
   if (!civicrm_initialize()) {
-    return;
+    return array();
   }
 
   $field = field_info_field($field_name);
