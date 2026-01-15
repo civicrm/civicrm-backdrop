@@ -1195,7 +1195,8 @@ function _civicrm_filter_process($text, $filter, $format, $langcode, $cache, $ca
 
   try {
     $text = CRM_Utils_String::parseOneOffStringThroughSmarty($text);
-  } catch (Exception $e) {
+  }
+  catch (Exception $e) {
     if (config_get('system.core', 'error_level') != ERROR_REPORTING_HIDE) {
       $message = t('Unable to parse CiviCRM Smarty token: @message', array('@message' => $e->getMessage()));
       backdrop_set_message($message, 'error');
