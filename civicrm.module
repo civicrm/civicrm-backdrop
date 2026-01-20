@@ -41,7 +41,7 @@ require_once 'civicrm_user.inc';
  * @see CRM_Upgrade_Incremental_General::MIN_INSTALL_PHP_VER
  * @see CiviBackdrop\PhpVersionTest::testConstantMatch()
  */
-define('CIVICRM_BACKDROP_PHP_MINIMUM', '8.0.0');
+define('CIVICRM_BACKDROP_PHP_MINIMUM', '8.1.2');
 
 /**
  * Adds CiviCRM CSS and JS resources into the header.
@@ -1195,7 +1195,8 @@ function _civicrm_filter_process($text, $filter, $format, $langcode, $cache, $ca
 
   try {
     $text = CRM_Utils_String::parseOneOffStringThroughSmarty($text);
-  } catch (Exception $e) {
+  }
+  catch (Exception $e) {
     if (config_get('system.core', 'error_level') != ERROR_REPORTING_HIDE) {
       $message = t('Unable to parse CiviCRM Smarty token: @message', array('@message' => $e->getMessage()));
       backdrop_set_message($message, 'error');
