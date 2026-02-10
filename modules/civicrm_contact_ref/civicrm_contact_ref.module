@@ -343,9 +343,7 @@ function civicrm_contact_ref_autocomplete_value($field_name, $entity_type, $bund
   // split it into multiple arguments and $string will only be a partial.
   // Make sure to recover the intended $string.
   $args = func_get_args();
-  // Shift off the $type, $field_name, $entity_type,
-  // $bundle_name, and $entity_id args.
-  array_shift($args);
+  // Shift off the $field_name, $entity_type, $bundle_name, and $entity_id args.
   array_shift($args);
   array_shift($args);
   array_shift($args);
