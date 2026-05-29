@@ -143,7 +143,7 @@ function civicrm_group_roles_form_alter(&$form, &$form_state, $form_id) {
       return;
     }
     // Make sure there is a CiviCRM record.
-    civicrm_initialize(TRUE);
+    civicrm_initialize();
     require_once 'CRM/Core/BAO/UFMatch.php';
     $contact_id = CRM_Core_BAO_UFMatch::getContactId($uid);
     if (!$contact_id) {
@@ -201,6 +201,7 @@ function civicrm_group_roles_civicrm_post($op, $objectName, $objectId, &$objectR
 
   $config = config('civicrm_group_roles.settings');
   $rules = $config->get('rules');
+  $groupRoles = array();
   foreach ($rules as $rule) {
     if ($rule['group_id'] == $group_id) {
       $groupRoles[] = $rule['role_name'];
@@ -236,7 +237,7 @@ function civicrm_group_roles_civicrm_post($op, $objectName, $objectId, &$objectR
           // Ideally would use GroupContact API with group_id as a parameter,
           // currently broken (amend once bug fixed):
           // http://issues.civicrm.org/jira/browse/CRM-10331?page=com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel
-          $contact_groups = civicrm_api('GroupContact', 'get', array(version => '3', 'contact_id' => $contact_id));
+          $contact_groups = civicrm_api('GroupContact', 'get', array('version' => '3', 'contact_id' => $contact_id));
           $in_group = FALSE;
           foreach ($contact_groups['values'] as $group_row) {
             if ($group_row['group_id'] == $group_id) {
@@ -567,7 +568,7 @@ function civicrm_group_roles_add_rule_form_validate($form, &$form_state) {
 
   // Validate edit flag if set.
   if (isset($form_state['values']['edit_flag']) && !is_numeric($form_state['values']['edit_flag'])) {
-    for_set_error('', t('Edit flag was not numeric.'));
+    form_set_error('', t('Edit flag was not numeric.'));
   }
 }
 
@@ -697,9 +698,9 @@ function civicrm_group_roles_add_remove_groups($account, $roles, $op) {
 
     }
     else {
-      watchdog('civicrm_group_roles', 'CiviCRM contact not found for Backdrop user ID @id', array('@id' => $user->uid), WATCHDOG_ERROR);
+      watchdog('civicrm_group_roles', 'CiviCRM contact not found for Backdrop user ID @id', array('@id' => $account->uid), WATCHDOG_ERROR);
       if ($debug_mode) {
-        backdrop_set_message(t('CiviCRM contact not found for Backdrop user ID @id', array('@id' => $user->uid)));
+        backdrop_set_message(t('CiviCRM contact not found for Backdrop user ID @id', array('@id' => $account->uid)));
       }
     }
   }

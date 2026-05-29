@@ -560,6 +560,7 @@ function _civicrm_member_roles_sync($ext_uid = NULL, $cid = NULL, $sync_type = N
 
   $allRoles = user_roles(TRUE);
   while ($contacts->fetch()) {
+    $inactive = array();
     $cid = $contacts->contact_id;
     $uid = CRM_Core_BAO_UFMatch::getUFId($cid);
     if (empty($uid)) {
