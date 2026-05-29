@@ -450,8 +450,10 @@ function civicrm_member_roles_add_rule_form_submit($form, &$form_state) {
 
   // If edit_flag is not set then get next highest number.
   $config = config('civicrm_member_roles.settings');
+  $existing_rules = $config->get('rules') ?? array();
+  $max = !empty($existing_rules) ? max(array_keys($existing_rules)) : 0;
   if (empty($form_state['values']['edit_flag'])) {
-    $id = max(array_keys($config->get('rules'))) + 1;
+    $id = $max + 1;
   }
   else {
     $id = (int) $form_state['values']['edit_flag'];
@@ -558,7 +560,6 @@ function _civicrm_member_roles_sync($ext_uid = NULL, $cid = NULL, $sync_type = N
     return FALSE;
   }
 
-  $allRoles = user_roles(TRUE);
   while ($contacts->fetch()) {
     $inactive = array();
     $cid = $contacts->contact_id;
@@ -622,11 +623,13 @@ function _civicrm_member_roles_sync($ext_uid = NULL, $cid = NULL, $sync_type = N
 
     if (empty($contactMemberships) && !empty($role_name)) {
       db_delete('users_roles')->condition('uid', $uid)->condition('role', $role_name, $roleCondition)->execute();
+      entity_get_controller('user')->resetCache([$uid]);
     }
     else {
       foreach ($contactMemberships as $membership) {
         if (!empty($role_name)) {
           db_delete('users_roles')->condition('uid', $uid)->condition('role', $role_name, $roleCondition)->execute();
+          entity_get_controller('user')->resetCache([$uid]);
         }
         if (is_array($memberroles[$membership['membership_type_id']])) {
           foreach ($memberroles[$membership['membership_type_id']] as $rolerule) {
