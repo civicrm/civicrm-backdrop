@@ -1,0 +1,385 @@
+<?php
+/*
+ +--------------------------------------------------------------------+
+ | Copyright CiviCRM LLC. All rights reserved.                        |
+ |                                                                    |
+ | This work is published under the GNU AGPLv3 license with some      |
+ | permitted exceptions and without any warranty. For full license    |
+ | and copyright information, see https://civicrm.org/licensing       |
+ +--------------------------------------------------------------------+
+ */
+
+/**
+ *
+ * @package CRM
+ * @copyright CiviCRM LLC https://civicrm.org/licensing
+ */
+
+/**
+ * Reimplementation of civicrm_og_sync
+ *
+ * The implementation of this module in versions up to 3.3 is one way --
+ * actions taken in Backdrop are reflected in CiviCRM, but not the other way
+ * around. The work here now implements some events going the other way.
+ *
+ * Groups will still be synced one way only. This is necessary, since CiviCRM
+ * does not know enough about OG enabled content types to create them on its
+ * own.
+ * Folks who need this would probably need at least a callback of some kind, and
+ * probably a configuration UI. This is beyond the scope of the work here.
+ *
+ * Changes in contacts and group memberships, however, can readily be handled.
+ * The old code calls into group creation code, which is probably why it was
+ * so hard to get right. This update will instead do a "look before you leap"
+ * approach, and if a group in CiviCRM does not have a counterpart in OG, it
+ * will be treated as "a feature", since there's a lot of use for groups beyond
+ * mirroring OG for most organizations.
+ */
+
+/**
+ * Implements hook_autoload_info().
+ */
+function civicrm_og_sync_autoload_info() {
+  return array(
+    'BridgeBackdrop' => 'includes/BridgeBackdrop.php',
+    'BridgeCivicrm' => 'includes/BridgeCivicrm.php',
+    'BridgeUtils' => 'includes/BridgeUtils.php',
+  );
+}
+
+/**
+ * Implements hook_config_info().
+ */
+function civicrm_og_sync_config_info() {
+  $prefixes['civicrm_og_sync.settings'] = array(
+    'label' => t('CiviCRM OG sync settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function civicrm_og_sync_menu() {
+  $items['admin/config/civicrm/og-sync'] = array(
+    'title' => 'CiviCRM OG Sync Settings',
+    'description' => 'Configure CiviCRM OG Sync',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('civicrm_og_sync_settings_form'),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer civicrm og sync'),
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function civicrm_og_sync_permission() {
+  return array(
+    'administer civicrm og sync' => array(
+      'title' => t('Administer CiviCRM OG Sync'),
+      'description' => t('Configure CiviCRM OG Sync settings'),
+    ),
+  );
+}
+
+/**
+ * Settings form for CiviCRM OG Sync.
+ */
+function civicrm_og_sync_settings_form($form, &$form_state) {
+  $config = config('civicrm_og_sync.settings');
+
+  // Get all available content types
+  $node_types = node_type_get_types();
+  $group_type_options = array();
+
+  foreach ($node_types as $type) {
+    if (og_is_group_type('node', $type->type)) {
+      $group_type_options[$type->type] = $type->name;
+    }
+  }
+
+  $form['#config'] = 'civicrm_og_sync.settings';
+
+  $form['enabled_group_type'] = array(
+    '#type' => 'radios',
+    '#title' => t('Enabled Group Type'),
+    '#description' => t('Select which group type should be synchronized with CiviCRM Groups.'),
+    '#options' => $group_type_options,
+    '#default_value' => $config->get('enabled_group_type') ?: '',
+  );
+
+  return system_settings_form($form);
+}
+
+/**
+ * Implements hook_node_insert().
+ */
+function civicrm_og_sync_node_insert(Node $node) {
+  _civicrm_og_sync_node_action($node);
+}
+
+/**
+ * Implements hook_node_update().
+ */
+function civicrm_og_sync_node_update(Node $node) {
+  _civicrm_og_sync_node_action($node);
+}
+
+/**
+ * Implements hook_node_delete().
+ */
+function civicrm_og_sync_node_delete(Node $node) {
+  if (!_civicrm_og_sync_check_isvalid($node)) {
+    return;
+  }
+
+  $groupid = $node->nid;
+
+  if ($groupid == 0) {
+    return;
+  }
+
+  _civicrm_og_sync_skip_process_request(TRUE);
+
+  $params = array(
+    'name' => $node->title,
+    'title' => $node->title,
+    'og_id' => $groupid,
+  );
+
+  BridgeBackdrop::nodeapi($params, 'delete');
+
+}
+
+/**
+ * Implements hook_og_membership_insert().
+ */
+function civicrm_og_sync_og_membership_insert(OgMembership $membership) {
+  _civicrm_og_sync_group_action($membership, 'add');
+}
+
+/**
+ * Implements hook_og_membership_update().
+ */
+function civicrm_og_sync_og_membership_update(OgMembership $membership) {
+  if ($membership->entity_type != 'user') {
+    return;
+  }
+
+  if ($membership->original->state != OG_STATE_ACTIVE && $membership->state == OG_STATE_ACTIVE) {
+    _civicrm_og_sync_group_action($membership, 'add');
+  }
+  if ($membership->original->state != OG_STATE_BLOCKED && $membership->state == OG_STATE_BLOCKED) {
+    _civicrm_og_sync_group_action($membership, 'remove');
+  }
+}
+
+/**
+ * Delete OG membership
+ *
+ * @param OgMembership $membership
+ */
+function civicrm_og_sync_og_membership_delete($membership) {
+  _civicrm_og_sync_group_action($membership, 'remove');
+}
+
+/**
+ * Implements hook_civicrm_post().
+ */
+function civicrm_og_sync_civicrm_post($op, $objectName, $objectID, $objectRef) {
+  //If this is called, we need to ignore hook_og.
+  if (_civicrm_og_sync_skip_process_request()) {
+    return;
+  }
+
+  if (!BridgeUtils::syncFromCiviCRM()) {
+    return;
+  }
+
+  _civicrm_og_sync_skip_process_request(TRUE);
+
+  switch ($objectName) {
+    case 'Group':
+      switch ($op) {
+        case 'create':
+        case 'edit':
+          //We have created a CiviCRM group, but if no OG exists,
+          //we *do not* create one.
+          BridgeCivicrm::group( $objectID, $objectRef, 'add' );
+          break;
+
+        case 'delete':
+          //This is a corner case.  Actually, we should
+          //try to make sure that the group delete *fails* on the
+          //CiviCRM side, but that will be done later, if hook_pre
+          //even makes this possible.
+
+          //TODO: block CRM group deletes if an OG exists for it.
+          // BridgeCivicrm::group( $objectID, $objectRef, 'delete' );
+          break;
+
+        default:
+          break;
+      }
+      break;
+
+    case 'GroupContact':
+      switch ($op) {
+        case 'create':
+        case 'edit':
+          BridgeCivicrm::groupContact($objectID, $objectRef, 'add');
+          break;
+
+        case 'delete':
+          BridgeCivicrm::groupContact($objectID, $objectRef, 'delete');
+          break;
+
+        default:
+          break;
+      }
+      break;
+
+    default:
+      break;
+  }
+}
+
+/**
+ * Update or Add node
+ *
+ * @param Node $node
+ */
+function _civicrm_og_sync_node_action(Node $node) {
+  if (!_civicrm_og_sync_check_isvalid($node)) {
+    return;
+  }
+
+  $title = substr(trim($node->title), 0, 49);
+
+  $groupid = $node->nid;
+
+  if ($groupid == 0) {
+    return;
+  }
+
+  $params = array(
+    'name' => $title,
+    'title' => $title,
+    'is_active' => 1,
+    'og_id' => $groupid,
+  );
+
+  BridgeBackdrop::nodeapi($params, 'add');
+
+  _civicrm_og_sync_skip_process_request(TRUE);
+
+  // also call the user hook since OG does not for admin
+  $params = array(
+    'og_id' => $groupid,
+    'uf_id' => $node->uid,
+    'is_active' => 1,
+    'is_admin' => 1,
+  );
+
+  BridgeBackdrop::og($params, 'add');
+}
+
+/**
+ * Sync group action
+ *
+ * @param OgMembership $membership
+ * @param string $op
+ */
+function _civicrm_og_sync_group_action($membership, $op = 'add') {
+  if ($membership->entity_type != 'user' || !civicrm_initialize() || _civicrm_og_sync_skip_process_request() || $membership->type == "trusted_contacts") {
+    return;
+  }
+
+  $group = entity_load('node', $membership->gid);
+
+  _civicrm_og_sync_skip_process_request(TRUE);
+
+  // add node
+  $createGroupParams = array(
+    'og_id' => $group->nid,
+    'title' => substr(trim($group->title), 0, 49),
+    // length of 49 so that the admin group can fit ': administrator'
+    // afterwards within 64 char field
+    'name' => substr(trim($group->title), 0, 49),
+    'is_active' => 1,
+  );
+
+  BridgeBackdrop::nodeapi($createGroupParams, 'add');
+
+  $addToGroupParams = array(
+    'og_id' => $membership->gid,
+    'uf_id' => $membership->etid,
+    'is_active' => 1,
+    'is_admin' => 0,
+  );
+
+  // add contact in group
+  BridgeBackdrop::og($addToGroupParams, $op);
+}
+
+/**
+ * Check for context ,node type & civicrm initialization
+ *
+ * @param Node $node
+ */
+function _civicrm_og_sync_check_isvalid(Node $node) {
+  // check if the node if of type og
+  if (!og_is_group_type('node', $node->type)) {
+    return FALSE;
+  }
+
+  if (!civicrm_initialize()) {
+    return FALSE;
+  }
+  return TRUE;
+}
+
+/**
+ * Skip process request
+ *
+ * @param bool $skip
+ */
+function _civicrm_og_sync_skip_process_request($skip = FALSE) {
+  static $_process_request;
+  if ($skip) {
+    $_process_request = $skip;
+  }
+  return $_process_request;
+}
+
+/**
+ * Wrapper for og_membership creation.
+ *
+ * @param int $ogID
+ *   Organic Group ID.
+ * @param int $userID
+ *   Backdrop User ID.
+ */
+function civicrm_og_sync_wrapper_og_membership_create($ogID, $userID) {
+  // @TODO Find more solid way to check - try system_get_info('module', 'og').
+  //
+  // Also, since we don't know how to get the entity type of the group,
+  // we'll assume it's 'node'.
+  og_group('node', $ogID, ['entity' => user_load($userID)]);
+}
+
+/**
+ * Wrapper for og_membership deletion.
+ *
+ * @param int $ogID
+ *   Organic Group ID.
+ * @param int $userID
+ *   Backdrop User ID.
+ */
+function civicrm_og_sync_wrapper_og_membership_delete($ogID, $userID) {
+  // Also, since we don't know how to get the entity type of the group, we'll assume it's 'node'
+  og_ungroup('node', $ogID, 'user', user_load($userID));
+}
