@@ -45,7 +45,7 @@ function civicrm_group_roles_config_info() {
  * When a new user is created, add them to Civi groups depending on their
  * assigned roles.
  */
-function civicrm_group_roles_user_insert($account) {
+function civicrm_group_roles_user_insert(User $account) {
   if (!civicrm_initialize()) {
     return;
   }
@@ -58,7 +58,7 @@ function civicrm_group_roles_user_insert($account) {
  * When a user is updated, add/remove them from Civi groups according to their
  * roles.
  */
-function civicrm_group_roles_user_update($account) {
+function civicrm_group_roles_user_update(User $account) {
   if (!civicrm_initialize()) {
     return;
   }
@@ -75,7 +75,7 @@ function civicrm_group_roles_user_update($account) {
  * When a user logs in, update their roles depending on which Civi groups they
  * are a member of.
  */
-function civicrm_group_roles_user_login(&$edit, $account) {
+function civicrm_group_roles_user_login(&$edit, User $account) {
   civicrm_group_roles_sync_roles($account);
 }
 
@@ -83,7 +83,7 @@ function civicrm_group_roles_user_login(&$edit, $account) {
  * Helper function to add a user to Civi groups depending on their roles, when
  * the user is first created
  *
- * @param object $account
+ * @param User $account
  * @param array $roles
  */
 function civicrm_group_roles_add_groups_oncreate($account, $roles) {
@@ -101,22 +101,23 @@ function civicrm_group_roles_add_groups_oncreate($account, $roles) {
   $config = config('civicrm_group_roles.settings');
   $result = $config->get('rules');
   $group_ids = [];
+
   foreach ($result as $rule) {
-    if (in_array($rule['role_name'], array_keys($roles))) {
+    if (in_array($rule['role_name'], array_values($roles))) {
       $group_ids[] = $rule['group_id'];
     }
   }
-  $groups = _civicrm_group_roles_validate_groups($group_ids);
-  foreach ($groups as $group) {
+  $group_ids = _civicrm_group_roles_validate_groups($group_ids);
+  foreach ($group_ids as $group_id) {
     $groupContact = new CRM_Contact_DAO_GroupContact();
-    $groupContact->group_id = $group->group_id;
+    $groupContact->group_id = $group_id;
     $groupContact->contact_id = $contactId;
 
     if (!$groupContact->find(TRUE)) {
       // add the contact to group
       $historyParams = array(
         'contact_id' => $contactId,
-        'group_id' => $group->group_id,
+        'group_id' => $group_id,
         'method' => 'API',
         'status' => 'Added',
         'date' => date('YmdHis'),
@@ -277,15 +278,18 @@ function civicrm_group_roles_civicrm_post($op, $objectName, $objectId, &$objectR
 /**
  * Helper function to add a role to a given user
  *
- * @param int $uid The user id of the account to modify
- * @param string $role_name The role name being added
+ * @param int $uid
+ *   The user id of the account to modify.
+ * @param string
+ *   $role_name The role name being added.
  */
 function civicrm_group_roles_add_role($uid, $role_name) {
   $account = user_load((int) $uid, TRUE);
 
   // Skip adding the role to the user if they already have it.
-  if ($account !== FALSE && !in_array($role_name, $account->roles)) {
-    $account->roles = $account->roles + array($role_name);
+  if ($account !== FALSE && !in_array($role_name, array_values($account->roles))) {
+    $account->roles[] = $role_name;
+    $account->roles = array_values(array_unique($account->roles));
     $account->save();
   }
 }
@@ -293,14 +297,16 @@ function civicrm_group_roles_add_role($uid, $role_name) {
 /**
  * Helper function to remove a role from a given user
  *
- * @param $uid The user id of the account to modify
- * @param $role_name The role name being removd
+ * @param int $uid
+ *   The user id of the account to modify.
+ * @param string $role_name
+ *   The role name being removed.
  */
 function civicrm_group_roles_del_role($uid, $role_name) {
   $account = user_load((int) $uid);
   // Skip removing the role from the user if they don't have it.
   if ($account !== FALSE && in_array($role_name, $account->roles)) {
-    $account->roles = array_diff($account->roles, array($role_name));
+    $account->roles = array_values(array_diff($account->roles, array($role_name)));
     $account->save();
   }
 }
@@ -424,8 +430,8 @@ function civicrm_group_roles_permission() {
 /**
  * Show stored association rules and delete rules.
  *
- * @param string $action
- * @param int $id
+ * @param string|null $action
+ * @param int|null $id
  *
  * @return string|array|null
  *   Array of rules or message if none.
@@ -457,12 +463,12 @@ function civicrm_group_roles_show_rules($action = NULL, $id = NULL) {
   $data = array();
 
   $rules = $config->get('rules');
-  foreach ($rules as $id => $result) {
+  foreach ($rules as $rule_id => $result) {
     $gid = $groups[$result['group_id']] ?? NULL;
     $data[] = array(
-      'rid' => check_plain($id),
+      'rid' => check_plain($rule_id),
       'name' => check_plain(($gid['title'] ?? '') . " <--> " . $roles[$result['role_name']]),
-      'op' => l(t('edit'), 'admin/config/civicrm/civicrm_group_roles/add_rule' . '/' . check_plain($id)) . '&nbsp;&nbsp;' . l(t('delete'), 'admin/config/civicrm/civicrm_group_roles/delete' . '/' . check_plain($id)),
+      'op' => l(t('edit'), 'admin/config/civicrm/civicrm_group_roles/add_rule' . '/' . check_plain($rule_id)) . '&nbsp;&nbsp;' . l(t('delete'), 'admin/config/civicrm/civicrm_group_roles/delete' . '/' . check_plain($rule_id)),
     );
   }
 
@@ -772,6 +778,9 @@ function civicrm_group_roles_batch_init() {
 /**
  * Batch worker
  *
+ * @param int $uid
+ * @param array $context
+ *
  * @see civicrm_group_roles_batch_init()
  */
 function civicrm_group_roles_batch_worker($uid, &$context) {
@@ -783,7 +792,7 @@ function civicrm_group_roles_batch_worker($uid, &$context) {
 
   if ($account !== FALSE) {
 
-    $roles = array_diff($account->roles, array(BACKDROP_ANONYMOUS_ROLE, BACKDROP_AUTHENTICATED_ROLE));
+    $roles = array_values(array_diff($account->roles, array(BACKDROP_ANONYMOUS_ROLE, BACKDROP_AUTHENTICATED_ROLE)));
 
     // Add user to groups
     if ($roles) {
@@ -802,6 +811,10 @@ function civicrm_group_roles_batch_worker($uid, &$context) {
 
 /**
  * Batch finish handler
+ *
+ * @param bool $success
+ * @param array $results
+ * @param array $operations
  *
  * @see civicrm_group_roles_batch_init()
  */
@@ -857,9 +870,10 @@ function _civicrm_group_roles_validate_groups(array $group_ids) {
 
 /**
  * Helper function to add and remove roles from a user depending on the groups
- * they are a member of
+ * they are a member of.
  *
- * @param $account object The user account being processed
+ * @param User $account
+ *   The user account being processed
  */
 function civicrm_group_roles_sync_roles($account) {
   if (!civicrm_initialize()) {
@@ -932,6 +946,10 @@ function civicrm_group_roles_sync_roles($account) {
     watchdog('civicrm_group_roles', 'Initial roles: @initial, roles to add: @add, roles to remove: @remove, final roles: @final', $params, WATCHDOG_INFO);
   }
 
+  $finalRoles = array_values(array_unique($finalRoles));
+  sort($finalRoles);
+  $currentRoles = array_values($account->roles);
+  sort($currentRoles);
   if ($account->roles !== $finalRoles) {
     $account->roles = $finalRoles;
     $account->save();
