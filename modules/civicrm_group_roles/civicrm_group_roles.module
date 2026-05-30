@@ -189,7 +189,7 @@ function _civicrm_group_update($form, $form_values) {
  *
  * This provides sync from CiviCRM -> Backdrop
  */
-function civicrm_group_roles_civicrm_post($op, $objectName, $objectId, object &$objectRef) {
+function civicrm_group_roles_civicrm_post($op, $objectName, $objectId, &$objectRef) {
   if (!civicrm_initialize()) {
     return;
   }
