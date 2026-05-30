@@ -1,0 +1,9 @@
+name = CiviCRM OG Sync
+description = Synchronize Organic Groups and CiviCRM Groups and ACLs.
+backdrop = 1.x
+type = module
+package = CiviCRM
+project = civicrm
+
+dependencies[] = civicrm
+dependencies[] = og

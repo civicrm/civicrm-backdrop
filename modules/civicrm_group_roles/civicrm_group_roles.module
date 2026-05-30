@@ -91,8 +91,17 @@ function civicrm_group_roles_add_groups_oncreate($account, $roles) {
     return;
   }
 
-  require_once 'CRM/Core/BAO/UFMatch.php';
-  $contactId = CRM_Core_BAO_UFMatch::getContactId($account->uid);
+  try {
+    $resUf = Civi\Api4\UfMatch::get()
+      ->addSelect('contact_id')
+      ->addWhere('uf_id', '=', $account->uid)
+      ->setLimit(1)
+      ->execute();
+
+    $contactId = $resUf->first()?->contact_id ?? NULL;
+  } catch (\CRM_Core_Exception $e) {
+      $contactId = NULL;
+  }
 
   if (!$contactId) {
     return;
@@ -109,23 +118,30 @@ function civicrm_group_roles_add_groups_oncreate($account, $roles) {
   }
   $group_ids = _civicrm_group_roles_validate_groups($group_ids);
   foreach ($group_ids as $group_id) {
-    $groupContact = new CRM_Contact_DAO_GroupContact();
-    $groupContact->group_id = $group_id;
-    $groupContact->contact_id = $contactId;
+    try {
+      $result = \Civi\Api4\GroupContact::save()
+        ->addRecord([
+          'status' => 'Added',
+          'group_id' => $group_id,
+          'contact_id' => $contactId,
+        ])->setMatch(['contact_id', 'group_id']);
+      $groupContactId = $result->first()?->id ?? NULL;
 
-    if (!$groupContact->find(TRUE)) {
-      // add the contact to group
-      $historyParams = array(
-        'contact_id' => $contactId,
-        'group_id' => $group_id,
-        'method' => 'API',
-        'status' => 'Added',
-        'date' => date('YmdHis'),
-        'tracking' => NULL,
-      );
-      CRM_Contact_BAO_SubscriptionHistory::create($historyParams);
-      $groupContact->status = 'Added';
-      $groupContact->save();
+      if ($groupContactId) {
+        $historyParams = array(
+          'contact_id' => $contactId,
+          'group_id' => $group_id,
+          'method' => 'API',
+          'status' => 'Added',
+          'date' => date('YmdHis'),
+          'tracking' => NULL,
+        );
+
+        \Civi\Api4\SubscriptionHistory::create()
+          ->setValues($historyParams)
+          ->execute();
+      }
+    } catch (\CRM_Core_Exception $e) {
     }
   }
 }
@@ -145,8 +161,18 @@ function civicrm_group_roles_form_alter(&$form, &$form_state, $form_id) {
     }
     // Make sure there is a CiviCRM record.
     civicrm_initialize();
-    require_once 'CRM/Core/BAO/UFMatch.php';
-    $contact_id = CRM_Core_BAO_UFMatch::getContactId($uid);
+    try {
+      $resUf = Civi\Api4\UFMatch::get()
+        ->addSelect('contact_id')
+        ->addWhere('uf_id', '=', $uid)
+        ->setLimit(1)
+        ->execute();
+
+      $contact_id = $resUf->first()?->contact_id ?? NULL;
+    } catch (\CRM_Core_Exception $e) {
+        $contact_id = NULL;
+    }
+
     if (!$contact_id) {
       return;
     }
@@ -217,8 +243,17 @@ function civicrm_group_roles_civicrm_post($op, $objectName, $objectId, &$objectR
       }
 
       // Do we have a Backdrop Account?
-      require_once 'CRM/Core/BAO/UFMatch.php';
-      $uid = CRM_Core_BAO_UFMatch::getUFId($contact_id);
+      try {
+        $resUf = Civi\Api4\UfMatch::get()
+          ->addSelect('uf_id')
+          ->addWhere('contact_id', '=', $contact_id)
+          ->setLimit(1)
+          ->execute();
+
+        $uid = $resUf->first()?->uf_id ?? NULL;
+      } catch (\CRM_Core_Exception $e) {
+          $uid = NULL;
+      }
       // Make sure we have an actual user account.
       if (!$uid) {
         continue;
@@ -651,18 +686,19 @@ function civicrm_group_roles_add_remove_groups($account, $roles, $op) {
 
   // Make sure user has other roles other than authenticated.
   if ($roles) {
-    // Find the contact record.
-    $params = array(
-      'version' => 3,
-      'sequential' => 1,
-      'return' => 'contact_id',
-      'uf_id' => $account->uid,
-    );
-    $contact = civicrm_api('UFMatch', 'get', $params);
+    try {
+      $resUf = Civi\Api4\UFMatch::get()
+        ->addSelect('contact_id')
+        ->addWhere('uf_id', '=', $account->uid)
+        ->setLimit(1)
+        ->execute();
 
-    if (!empty($contact['values']) && empty($contact['is_error']) && is_numeric($contact['values'][0]['contact_id'])) {
-      $contact_id = $contact['values'][0]['contact_id'] ?? NULL;
+      $contact_id = $resUf->first()?->contact_id ?? NULL;
+    } catch (\CRM_Core_Exception $e) {
+        $contact_id = NULL;
+    }
 
+    if ($contact_id) {
       // Loop over user's roles.
       foreach ($roles as $role) {
         // Find the group(s) for the role.
