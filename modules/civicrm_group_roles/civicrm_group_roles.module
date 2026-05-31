@@ -92,13 +92,13 @@ function civicrm_group_roles_add_groups_oncreate($account, $roles) {
   }
 
   try {
-    $resUf = Civi\Api4\UfMatch::get()
+    $resUf = \Civi\Api4\UFMatch::get()
       ->addSelect('contact_id')
       ->addWhere('uf_id', '=', $account->uid)
       ->setLimit(1)
       ->execute();
 
-    $contactId = $resUf->first()?->contact_id ?? NULL;
+    $contactId = $resUf->first()['contact_id'] ?? NULL;
   } catch (\CRM_Core_Exception $e) {
       $contactId = NULL;
   }
@@ -162,13 +162,13 @@ function civicrm_group_roles_form_alter(&$form, &$form_state, $form_id) {
     // Make sure there is a CiviCRM record.
     civicrm_initialize();
     try {
-      $resUf = Civi\Api4\UFMatch::get()
+      $resUf = \Civi\Api4\UFMatch::get()
         ->addSelect('contact_id')
         ->addWhere('uf_id', '=', $uid)
         ->setLimit(1)
         ->execute();
 
-      $contact_id = $resUf->first()?->contact_id ?? NULL;
+      $contact_id = $resUf->first()['contact_id'] ?? NULL;
     } catch (\CRM_Core_Exception $e) {
         $contact_id = NULL;
     }
@@ -244,13 +244,13 @@ function civicrm_group_roles_civicrm_post($op, $objectName, $objectId, &$objectR
 
       // Do we have a Backdrop Account?
       try {
-        $resUf = Civi\Api4\UfMatch::get()
+        $resUf = Civi\Api4\UFMatch::get()
           ->addSelect('uf_id')
           ->addWhere('contact_id', '=', $contact_id)
           ->setLimit(1)
           ->execute();
 
-        $uid = $resUf->first()?->uf_id ?? NULL;
+        $uid = $resUf->first()['uf_id'] ?? NULL;
       } catch (\CRM_Core_Exception $e) {
           $uid = NULL;
       }
@@ -687,13 +687,13 @@ function civicrm_group_roles_add_remove_groups($account, $roles, $op) {
   // Make sure user has other roles other than authenticated.
   if ($roles) {
     try {
-      $resUf = Civi\Api4\UFMatch::get()
+      $resUf = \Civi\Api4\UFMatch::get()
         ->addSelect('contact_id')
         ->addWhere('uf_id', '=', $account->uid)
         ->setLimit(1)
         ->execute();
 
-      $contact_id = $resUf->first()?->contact_id ?? NULL;
+      $contact_id = $resUf->first()['contact_id'] ?? NULL;
     } catch (\CRM_Core_Exception $e) {
         $contact_id = NULL;
     }
@@ -916,11 +916,17 @@ function civicrm_group_roles_sync_roles($account) {
     return;
   }
 
-  require_once 'api/api.php';
-  require_once 'CRM/Core/BAO/UFMatch.php';
+  try {
+    $resUf = \Civi\Api4\UFMatch::get()
+      ->addSelect('contact_id')
+      ->addWhere('uf_id', '=', $account->uid)
+      ->setLimit(1)
+      ->execute();
 
-  //find the contact record
-  $contact = CRM_Core_BAO_UFMatch::getContactId($account->uid);
+    $contact = $resUf->first()['contact_id'] ?? NULL;
+  } catch (\CRM_Core_Exception $e) {
+    $contact = NULL;
+  }
   if (!$contact) {
     return;
   }
