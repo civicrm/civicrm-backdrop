@@ -18,11 +18,12 @@
  */
 
 require_once 'civicrm_rules_utils.inc';
+use Civi\Token\TokenProcessor;
 
 function civicrm_rules_rules_action_mailing_send_email($to,
   $subject,
   $message,
-  $from = NULL,
+  $from,
   $settings,
   RulesState $state,
   RulesPlugin $element
@@ -33,7 +34,7 @@ function civicrm_rules_rules_action_mailing_send_email($to,
     if (empty($toEmails)) {
       return;
     }
-    require_once 'CRM/Utils/Token.php';
+
     $tokens['mailing'] = array(
       'mailing.editUrl',
       'mailing.scheduleUrl',
@@ -42,13 +43,22 @@ function civicrm_rules_rules_action_mailing_send_email($to,
       'mailing.creator',
     );
 
-    $params            = array();
+    $params = [];
     $params['from']    = !empty($from) ? str_replace(array(
       "\r", "\n",
     ), '', $from) : 'Admin';
-    $params['subject'] = CRM_Utils_Token::replaceMailingTokens($subject, $state->variables['mailing'], NULL, $tokens);
-    $params['html']    = CRM_Utils_Token::replaceMailingTokens($message, $state->variables['mailing'], NULL, $tokens);
+    $mailingContext = $state->variables['mailing']->id ? ['mailingId' => $state->variables['mailing']->id] : [];
+    $tokenProcessor = new TokenProcessor(\Civi::dispatcher(), $mailingContext + [
+      'controller' => __CLASS__,
+      'smarty' => FALSE,
+    ]);
 
+    $tokenProcessor->addMessage('subject', $subject, 'text/plain');
+    $tokenProcessor->addMessage('html', $subject, 'text/html');
+    $tokenProcessor->addRow();
+    $tokenProcessor->evaluate();
+    $params['subject'] = $tokenProcessor->getRow(0)->render('subject');
+    $params['html'] = $tokenProcessor->getRow(0)->render('html');
     // also allow some user permission tokens for the toEmail
     $tokens['user'] = array(
       'user.permission-schedule mailings',
@@ -56,8 +66,15 @@ function civicrm_rules_rules_action_mailing_send_email($to,
       'user.permission-approve mailings',
     );
     foreach ($toEmails as $toEmail) {
-      $params['toEmail'] = CRM_Utils_Token::replaceMailingTokens($toEmail, $state->variables['mailing'], NULL, $tokens);
+      $tokenProcessor = new TokenProcessor(\Civi::dispatcher(), $mailingContext + [
+        'controller' => __CLASS__,
+        'smarty' => FALSE,
+      ]);
 
+      $tokenProcessor->addMessage('toEmail', $toEmail, 'text/plain');
+      $tokenProcessor->addRow();
+      $tokenProcessor->evaluate();
+      $params['toEmail'] = $tokenProcessor->getRow(0)->render('toEmail');
       //only process user permission tokens if used in toEmail
       if (in_array(trim($toEmail, '{}'), $tokens['user'])) {
         //we require a TO email, but can only send one; so we strip the first off and send the rest as CCs
